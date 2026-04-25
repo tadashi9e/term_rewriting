@@ -10,17 +10,19 @@ setup :-
     trs_dump_all_rules.
 
 test :-
-    Tests = [test1, test2, test3, test4, test5, test6, test7,
+    Tests = [test1, test2, test3, test4, test5, test6, test7, test8, test9,
              test_calc1, test_calc2, test_calc3, test_calc4, test_calc5,
              test_calc6, test_calc7, test_calc8,test_calc9, test_calc10,
              test_calc11],
     foldl(run_test, Tests, ok_ng(0,0), ok_ng(OK,NG)),
     length(Tests, Total),
-    format('Total: ~w, OK: ~w, NG: ~w~n', [Total, OK, NG]).
+    writeln('############################################################'),
+    format('#    Total: ~w, OK: ~w, NG: ~w~n', [Total, OK, NG]),
+    writeln('############################################################').
 
 run_test(Test, ok_ng(OK0,NG0), ok_ng(OK,NG)) :-
     writeln('############################################################'),
-    format('    ~w~n', Test),
+    format('#    ~w~n', Test),
     writeln('############################################################'),
     (   call(Test)
     ->  OK is OK0 + 1,
@@ -77,20 +79,25 @@ test6 :-
     ; writeln('NG'), !, fail).
 test7 :-
     trs_resolve([p ∨ q,
+                 ¬ p ∨ q,
+                 p ∨ ¬ q,
+                 ¬ p ∨ ¬ q], OutTerms), !,
+    writeln(OutTerms),
+    ( OutTerms = [⊥], writeln('OK')
+    ; writeln('NG'), !, fail).
+test8 :-
+    trs_resolve([p ∨ q,
                  ¬ p ∨ r,
                  ¬ q ∨ s,
-                 ¬ r ∨ ¬ s], OutTerms, 10, 10), !,
+                 ¬ r ∨ ¬ s], OutTerms, 5, 5), !,
     writeln(OutTerms),
     ( OutTerms = [s ∨ ¬ s], writeln('OK')
     ; writeln('NG'), !, fail).
-
-test10 :-
-    trs_resolve([ (a ∨ b ∨ c)
-                  ∧ (¬a ∨ ¬b)
-                  ∧ (¬b ∨ ¬c)
-                  ∧ (¬a ∨ ¬c) ], OutTerms), !,
+test9 :-
+    trs_resolve([ p ∨ q,
+                  ¬ p ∨ ¬ q ], OutTerms, 5, 5), !,
     writeln(OutTerms),
-    ( OutTerms = [⊥], writeln('OK')
+    ( OutTerms = [q∨ ¬q], writeln('OK')
     ; writeln('NG'), !, fail).
 
 test_calc1 :-
