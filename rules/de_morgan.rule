@@ -1,0 +1,8 @@
+% -*- mode: prolog; coding: utf-8-unix -*-
+
+ド_モルガンの法則_de_morgan_law @
+¬(P ∨ Q) ==> ¬ P ∧ ¬ Q.
+
+ド_モルガンの法則_de_morgan_law @
+¬(P ∧ Q) ==> ¬ P ∨ ¬ Q.
+

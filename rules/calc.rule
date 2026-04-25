@@ -1,0 +1,74 @@
+% -*- mode: prolog; coding: utf-8-unix -*-
+
+'計算開始' @
+X is A ==>
+X is plus([A])
+:- \+ A =.. [plus|_].
+
+'計算完了' @
+X is plus([N]) ==>
+X = N
+:- integer(N).
+
+'分解' @
+X is plus([A+B|Y]) ==>
+X is plus([A,B|Y]).
+
+'足し算(数値)' @
+X is plus([N,M|Y]) ==>
+X is plus(SumAndRest)
+:- integer(N), integer(M),
+   sum([N,M|Y], SumAndRest).
+
+abolish(sum/2).
+assert((sum([N,M|In], Out)
+        :- integer(N), integer(M), NM is N + M,
+           sum([NM|In], Out))).
+assert(sum(N, N)).
+
+'掛け算(*0)' @
+X is plus([_*0|Y]) ==>
+X is plus(Y).
+
+'掛け算(*1)' @
+X is plus([A*1|Y]) ==>
+X is plus([A|Y]).
+
+'掛け算(交換)' @
+X is plus([N*A|Y]) ==>
+X is plus([A*N|Y])
+:- integer(N), \+ integer(A).
+
+'掛け算(帰納法)' @
+X is plus([A*N|Y]) ==>
+X is plus([A*N1,A|Y])
+:- integer(N), N > 0,
+   N1 is N - 1.
+
+'分配法則' @
+X is plus([A*(B+C)|Y]) ==>
+X is plus([A*B,A*C|Y]).
+
+'分配法則' @
+X is plus([(A+B)*C|Y]) ==>
+X is plus([A*C,B*C|Y]).
+
+'回転' @
+X is plus([N,M|Y]) ==>
+X is plus([M|YandN])
+:- integer(N), \+ integer(M),
+   append(Y, [N], YandN).
+
+'回転(アトムを後ろに)' @
+X is plus([A,B|Y]) ==>
+X is plus([B|YandA])
+:- atom(A), \+ integer(B),
+   append(Y, [A], YandA).
+
+'結合' @
+X is plus([(A+B)|Y]) ==>
+X is plus([A,B|Y]).
+
+'結合(掛け算左寄せ)' @
+X is plus([A*(B*C)|Y]) ==>
+X is plus([(A*B)*C|Y]).

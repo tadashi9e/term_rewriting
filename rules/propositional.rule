@@ -1,0 +1,48 @@
+% -*- mode: prolog; coding: utf-8-unix -*-
+
+分配 @
+P ∨ (Q ∧ R) ==> P ∨ Q, P ∨ R :- \+ P = Q.
+
+吸収 @
+P ∨ (P ∧ _) ==> P.
+
+前件肯定_modus_ponens @
+P, P → Q ==> Q.
+
+後件否定_modus_tollens @
+¬ Q, P → Q ==> ¬ Q, ¬ P.
+
+否定導入_not @
+P → ⊥ ==> ¬ P.
+否定導入_not @
+P → ⊥(_) ==> ¬ P.
+
+二重否定の除去_double_negative_elimination @
+¬ ¬ P ==> P.
+
+選言三段論法_disjunctive_syllogism @
+P ∨ Q, ¬ P ==> Q, ¬ P.
+
+仮言三段論法_hypothetical_syllogism @
+P → Q, Q → R ==> P → R.
+
+論理和の消去_disjunction_elimination @
+P → Q, R → Q, P ∨ R ==> Q.
+
+論理和の消去_disjunction_elimination @
+P ∨ P ==> P.
+
+論理積の消去_conjunction_elimination @
+P ∧ Q ==> P, Q.
+
+論理積の消去_conjunction_elimination @
+P, P ==> P.
+
+矛盾律_contradiction @
+A, ¬ A ==> ⊥(A).
+
+導出_resolution @
+L ∨ P, ¬ L ∨ Q ==> P ∨ Q
+:- L \= P, L \= ¬ P, ¬ L \= P,
+   L \= Q, L \= ¬ Q, ¬ L \= Q.
+
