@@ -23,6 +23,8 @@
 % 項書換えルール設定
 % ----------------------------------------------------------------------
 
+:- dynamic trs_rules/1.
+
 /**
  * ルールファイルの内容を読み込む。
  * @param 読み込み対象のルールファイル
@@ -120,6 +122,9 @@ trs_abolish_all_rules :-
  * @param Rules 適用したルールのリスト
  */
 trs_loop(InTerms, OutTerms, Rules, MaxSteps) :-
+    ( trs_rules(_) ;
+      format(user_error, 'error: ルールを読み込んでいません~n', []),
+      !, fail ),
     sort(InTerms, InTerms2),
     trs_loop_aux(InTerms2, OutTerms, Rules, MaxSteps).
 trs_loop_aux(InTerms, OutTerms, Rules, MaxSteps) :-
