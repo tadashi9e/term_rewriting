@@ -26,24 +26,24 @@ run_test(Test, ok_ng(OK0,NG0), ok_ng(OK,NG)) :-
     writeln('############################################################'),
     (   call(Test)
     ->  OK is OK0 + 1,
-        NG = NG0
+        NG = NG0,
+        writeln('OK')
     ;   OK = OK0,
-        NG is NG0 + 1
+        NG is NG0 + 1,
+        writeln('NG')
     ).
 
 test1 :-
     trs_resolve([a → b, b → c, c → d], OutTerms), !,
     writeln(OutTerms),
-    ( OutTerms = [a→d], writeln('OK')
-    ; writeln('NG'), !, fail).
+    OutTerms = [a→d].
 test2 :-
     trs_resolve([ (a ∨ b)
                   ∧ (¬a ∨ c)
                   ∧ (¬b ∨ c)
                   ∧ (¬c) ], OutTerms), !,
     writeln(OutTerms),
-    ( OutTerms = [⊥], writeln('OK')
-    ; writeln('NG'), !, fail).
+    OutTerms = [⊥].
 test3 :-
     trs_resolve([ (a → b)
                   ∧ (b → c)
@@ -51,96 +51,78 @@ test3 :-
                   ∧ a
                   ∧ (¬d) ], OutTerms), !,
     writeln(OutTerms),
-    ( OutTerms = [⊥], writeln('OK')
-    ; writeln('NG'), !, fail).
+    OutTerms = [⊥].
 test4 :-
     trs_resolve([ (a ∨ b)
                   ∧ (¬a ∨ b)
                   ∧ (a ∨ ¬b)
                   ∧ (¬a ∨ ¬b) ], OutTerms), !,
     writeln(OutTerms),
-    ( OutTerms = [⊥], writeln('OK')
-    ; writeln('NG'), !, fail).
+    OutTerms = [⊥].
 test5 :-
     trs_resolve([ (a ∨ b ∨ c)
                   ∧ (¬a ∨ b)
                   ∧ (¬b ∨ c)
                   ∧ (¬c) ], OutTerms), !,
     writeln(OutTerms),
-    ( OutTerms = [⊥], writeln('OK')
-    ; writeln('NG'), !, fail).
+    OutTerms = [⊥].
 test6 :-
     trs_resolve([p ∨ q,
                  ¬p ∨ r,
                  ¬q ∨ r,
                  ¬r], OutTerms), !,
     writeln(OutTerms),
-    ( OutTerms = [⊥], writeln('OK')
-    ; writeln('NG'), !, fail).
+    OutTerms = [⊥].
 test7 :-
     trs_resolve([p ∨ q,
                  ¬ p ∨ q,
                  p ∨ ¬ q,
                  ¬ p ∨ ¬ q], OutTerms), !,
     writeln(OutTerms),
-    ( OutTerms = [⊥], writeln('OK')
-    ; writeln('NG'), !, fail).
+    OutTerms = [⊥].
 test8 :-
     trs_resolve([p ∨ q,
                  ¬ p ∨ r,
                  ¬ q ∨ s,
                  ¬ r ∨ ¬ s], OutTerms, 5, 5), !,
     writeln(OutTerms),
-    ( OutTerms = [s ∨ ¬ s], writeln('OK')
-    ; writeln('NG'), !, fail).
+    OutTerms = [s ∨ ¬ s].
 test9 :-
     trs_resolve([ p ∨ q,
                   ¬ p ∨ ¬ q ], OutTerms, 5, 5), !,
     writeln(OutTerms),
-    ( OutTerms = [q∨ ¬q], writeln('OK')
-    ; writeln('NG'), !, fail).
+    OutTerms = [q∨ ¬q].
 
 test_calc1 :-
     trs_resolve([x is 1], OutTerms), !,
-    ( OutTerms = [x=1] -> writeln('OK')
-    ; writeln('NG'), !, fail).
+    OutTerms = [x=1].
 test_calc2 :-
     trs_resolve([x is 1+2], OutTerms), !,
-    ( OutTerms = [x=3] -> writeln('OK')
-    ; writeln('NG'), !, fail).
+    OutTerms = [x=3].
 test_calc3 :-
     trs_resolve([x is 1+2+3], OutTerms), !,
-    ( OutTerms = [x=6] -> writeln('OK')
-    ; writeln('NG'), !, fail).
+    OutTerms = [x=6].
 test_calc4 :-
     trs_resolve([x is 2*3*4], OutTerms), !,
-    ( OutTerms = [x=24] -> writeln('OK')
-    ; writeln('NG'), !, fail).
+    OutTerms = [x=24].
 test_calc5 :-
     trs_resolve([x is 2*(3*2)], OutTerms), !,
-    ( OutTerms = [x=12] -> writeln('OK')
-    ; writeln('NG'), !, fail).
+    OutTerms = [x=12].
 test_calc6 :-
     trs_resolve([x is 2*(2*(2*2))], OutTerms), !,
-    ( OutTerms = [x=16] -> writeln('OK')
-    ; writeln('NG'), !, fail).
+    OutTerms = [x=16].
 test_calc7 :-
     trs_resolve([x is 2*(3+4)], OutTerms), !,
-    ( OutTerms = [x=14] -> writeln('OK')
-    ; writeln('NG'), !, fail).
+    OutTerms = [x=14].
 test_calc8 :-
     trs_resolve([x is (3+4*2)*2], OutTerms), !,
-    ( OutTerms = [x=22] -> writeln('OK')
-    ; writeln('NG'), !, fail).
+    OutTerms = [x=22].
 test_calc9 :-
     trs_resolve([x is 2*(3+4*2)], OutTerms), !,
-    ( OutTerms = [x=22] -> writeln('OK')
-    ; writeln('NG'), !, fail).
+    OutTerms = [x=22].
 test_calc10 :-
     trs_resolve([x is (2+3)*(4+5)], OutTerms), !,
-    ( OutTerms = [x=45] -> writeln('OK')
-    ; writeln('NG'), !, fail).
+    OutTerms = [x=45].
 test_calc11 :-
     trs_resolve([x is 3*4*5], OutTerms), !,
-    ( OutTerms = [x=60] -> writeln('OK')
-    ; writeln('NG'), !, fail).
+    OutTerms = [x=60].
