@@ -24,6 +24,8 @@ P → ⊥(_) <=> ¬ P.
 
 選言三段論法_disjunctive_syllogism @
 ¬ P \ P ∨ Q  <=> assume(Q).
+選言三段論法_disjunctive_syllogism2 @
+¬ P \ Q ∨ P  <=> assume(Q).
 
 仮言三段論法_hypothetical_syllogism @
 P → Q, Q → R <=> P → R.

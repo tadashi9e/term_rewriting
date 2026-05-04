@@ -216,26 +216,22 @@ neg(¬A, A).
 neg(A, ¬A).
 
 /**
- * 与えられた規則にマッチする項があれば単一化する
+ * 条件リストの各項が入力項リストに含まれているかチェックする。
+ * （CHRの条件チェック。項は消費されない）
  */
 match_list([], _).
 match_list([M|Ms], Terms) :-
-    ( select(M, Terms, _)
-    ; commutative_law(M, W), select(W, Terms, _) ),
+    member(M, Terms),
     match_list(Ms, Terms).
+
 /**
- * 与えられた規則にマッチする項があれば単一化した上でリストから除去する
+ * 与えられた規則にマッチする項を単一化した上でリストから除去する。
+ * （CHRの削除。書き換え前の各項を順に削除）
  */
 replace_list([], Terms, Terms).
 replace_list([M|Ms], InTerms, OutTerms) :-
-    ( select(M, InTerms, Ts)
-    ; commutative_law(M, W), select(W, InTerms, Ts)),
+    select(M, InTerms, Ts),
     replace_list(Ms, Ts, OutTerms).
-
-% 交換法則
-commutative_law(A ∨ B, B ∨ A).
-commutative_law(A ∧ B, B ∧ A).
-commutative_law(A ⇔ B, B ⇔ A).
 
 check_guard(Guards) :- call(Guards).
 
