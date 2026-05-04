@@ -13,6 +13,7 @@
               op(1180, xfx, '<=>'),
               op(1180, xfx, '==>'),
               op(1105, xfy, '|'),
+              op(1100, xfx, '\\'),
               op(1000, xfy, '⊢'),
               op(900, xfy, '→'),
               op(900, xfy, '⇔'),
@@ -68,21 +69,41 @@ report_singletons(Term, Vars,
              [Name, Str]) ),
     report_singletons(Term, Vars, RestSingletons).
 
-parse_rule((RuleName @ From <=> Guards | To), Vars, ParsedRule) :-
-    tuple_to_list(From, FromList),
-    tuple_to_list(To, ToList),
-    ParsedRule = rule(RuleName, FromList, ToList, Guards, Vars).
-parse_rule(RuleName @ From <=> To, Vars, ParsedRule) :-
-    tuple_to_list(From, FromList),
-    tuple_to_list(To, ToList),
-    ParsedRule = rule(RuleName, FromList, ToList, true, Vars).
+parse_rule((RuleName @ Rule), Vars, ParsedRule) :-
+    parse_rule_aux(RuleName, Rule, Vars, ParsedRule).
 parse_rule(abolish(P), _, []) :-
     abolish(P), !.
 parse_rule(assert(P), _, []) :-
     assertz(P), !.
-parse_rule(Rule, Vars, []) :-
+parse_rule(Rule, Vars, ParsedRule) :-
+    parse_rule_aux('', Rule, Vars, ParsedRule).
+parse_rule_aux(RuleName, (From1 \ From2 <=> Guards | To),
+               Vars, ParsedRule) :-
+    !,
+    tuple_to_list(From1, From1List),
+    tuple_to_list(From2, From2List),
+    tuple_to_list(To, ToList),
+    ParsedRule = rule(RuleName, From1List, From2List, ToList, Guards, Vars).
+parse_rule_aux(RuleName, (From <=> Guards | To), Vars, ParsedRule) :-
+    tuple_to_list(From, FromList),
+    tuple_to_list(To, ToList),
+    !,
+    ParsedRule = rule(RuleName, [], FromList, ToList, Guards, Vars).
+parse_rule_aux(RuleName, (From1 \ From2 <=> To), Vars, ParsedRule) :-
+    tuple_to_list(From1, From1List),
+    tuple_to_list(From2, From2List),
+    tuple_to_list(To, ToList),
+    !,
+    ParsedRule = rule(RuleName, From1List, From2List, ToList, true, Vars).
+parse_rule_aux(RuleName, (From <=> To), Vars, ParsedRule) :-
+    tuple_to_list(From, FromList),
+    tuple_to_list(To, ToList),
+    !,
+    ParsedRule = rule(RuleName, [], FromList, ToList, true, Vars).
+parse_rule_aux(RuleName, Rule, Vars, _) :-
     term_string(Rule, Str, [variable_names(Vars)]),
-    format(user_error, 'failed to parse (ignored): ~s~n', [Str]).
+    format(user_error, 'failed to parse (ignored): ~s ~s~n',
+           [RuleName, Str]).
 
 tuple_to_list(A, [A]) :- var(A).
 tuple_to_list((A,B), [A|Rest]) :-
@@ -102,9 +123,13 @@ trs_dump_all_rules :-
     findall(Rule, trs_rules(Rule), RuleBag),
     dump_all_rules(RuleBag).
 dump_all_rules([]).
-dump_all_rules([rule(RuleName, FromList, ToList, Guard, Vars)|RuleBag]) :-
-    term_string((RuleName @ FromList <=> Guard | ToList), Str,
-                [variable_names(Vars)]),
+dump_all_rules(
+    [rule(RuleName, FromList1, FromList2, ToList, Guard, Vars)|RuleBag]) :-
+    ( FromList1 = []
+    -> term_string((RuleName @ FromList2 <=> Guard | ToList),
+                   Str, [variable_names(Vars)])
+    ; term_string((RuleName @ FromList1 \ FromList2 <=> Guard | ToList),
+                  Str, [variable_names(Vars)]) ),
     writeln(Str),
     dump_all_rules(RuleBag).
 
@@ -159,18 +184,20 @@ contains_bottom(Terms) :-
  * 適用した結果リストと適用したルール名を返す。
  */
 find_rule_and_apply(InTerms, OutTerms, Rule) :-
-    trs_rules(rule(RuleName, From, To, Guards, Vars)),
-    apply_rule(InTerms, OutTerms, From, Guards, To),
-    debug(trs, ':~p', (RuleName, From, To)),
-    term_string(From, FromStr, [variable_names(Vars)]),
+    trs_rules(rule(RuleName, From1, From2, To, Guards, Vars)),
+    apply_rule(InTerms, OutTerms, From1, From2, Guards, To),
+    debug(trs, ':~p', (RuleName, From1, From2, To)),
+    term_string(From1, From1Str, [variable_names(Vars)]),
+    term_string(From2, From2Str, [variable_names(Vars)]),
     term_string(To, ToStr, [variable_names(Vars)]),
-    Rule =.. [RuleName, FromStr, ToStr, OutTerms].
+    Rule =.. [RuleName, From1Str, From2Str, ToStr, OutTerms].
 
 /**
  * 与えられた規則にマッチする項がリストにあれば、置き換える。
  */
-apply_rule(InTerms, OutTerms, FromRule, Guards, ToRule) :-
-    replace_list(FromRule, InTerms, AppliedTerms),
+apply_rule(InTerms, OutTerms, FromRule1, FromRule2, Guards, ToRule) :-
+    match_list(FromRule1, InTerms),
+    replace_list(FromRule2, InTerms, AppliedTerms),
     check_guard(Guards),
     append(AppliedTerms, ToRule, RawOutTerms),
     %\+ tautology_clause(RawOutTerms),  % トートロジー除去
@@ -188,6 +215,14 @@ tautology_clause(Clause) :-
 neg(¬A, A).
 neg(A, ¬A).
 
+/**
+ * 与えられた規則にマッチする項があれば単一化する
+ */
+match_list([], _).
+match_list([M|Ms], Terms) :-
+    ( select(M, Terms, _)
+    ; commutative_law(M, W), select(W, Terms, _) ),
+    match_list(Ms, Terms).
 /**
  * 与えられた規則にマッチする項があれば単一化した上でリストから除去する
  */
@@ -222,9 +257,12 @@ trs_dump_history(InTerms, Rules) :-
     dump_rules(RevRules).
 dump_rules([]).
 dump_rules([Rule|Rules]) :-
-    Rule =.. [RuleName, From, To, OutTerms],
+    Rule =.. [RuleName, From1, From2, To, OutTerms],
     write('---------------- '), write(RuleName), write(' ( '),
-    write(From), write(' ⊢ '), write(To), write(' )'), nl,
+    ( From1 = "[]"
+    -> write(From2)
+    ; write(From1), write(' \\ '), write(From2) ),
+    write(' ⊢ '), write(To), write(' )'), nl,
     print_terms(OutTerms), nl,
     dump_rules(Rules).
 

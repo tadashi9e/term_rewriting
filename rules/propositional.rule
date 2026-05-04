@@ -12,7 +12,7 @@ P ∨ (P ∧ _) <=> assume(P).
 assume(P), (P → Q) <=> assume(Q).
 
 後件否定_modus_tollens @
-¬ Q, (P → Q) <=> ¬ Q, ¬ P.
+¬ Q \ (P → Q) <=> ¬ P.
 
 否定導入_not @
 P → ⊥ <=> ¬ P.
@@ -23,7 +23,7 @@ P → ⊥(_) <=> ¬ P.
 ¬ ¬ P <=> assume(P).
 
 選言三段論法_disjunctive_syllogism @
-P ∨ Q, ¬ P <=> assume(Q), ¬ P.
+¬ P \ P ∨ Q  <=> assume(Q).
 
 仮言三段論法_hypothetical_syllogism @
 P → Q, Q → R <=> P → R.
