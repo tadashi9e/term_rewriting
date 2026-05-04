@@ -44,7 +44,7 @@
 ド_モルガンの法則_de_morgan_law @ ¬(P ∨ Q) <=> ¬ P ∧ ¬ Q.
 ド_モルガンの法則_de_morgan_law @ ¬(P ∧ Q) <=> ¬ P ∨ ¬ Q.
 
-remove_assume @ assume(P) <=> compound(P) | P.
+unwrap @ assume(P) <=> compound(P) | P.
 
 分配 @
 P ∨ (Q ∧ R) <=> \+ P = Q | P ∨ Q, P ∨ R.
@@ -54,9 +54,6 @@ P ∨ (P ∧ _) <=> assume(P).
 
 '前件肯定_modus_ponens' @
 assume(P), (P → Q) <=> assume(Q).
-
-%後件否定_modus_tollens @
-%¬ Q, (P → Q) <=> ¬ Q, ¬ P.
 
 後件否定_modus_tollens @
 ¬ Q \ (P → Q) <=> ¬ P.

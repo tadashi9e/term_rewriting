@@ -1,6 +1,6 @@
 % -*- mode: prolog; coding: utf-8-unix -*-
 
-remove_assume @ assume(P) <=> compound(P) | P.
+assume(P) <=> compound(P) | P.
 
 分配 @
 P ∨ (Q ∧ R) <=> \+ P = Q | P ∨ Q, P ∨ R.

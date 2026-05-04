@@ -11,13 +11,13 @@ For built-in help, use ?- help(Topic). or ?- apropos(Word).
 true.
 
 ?- setup.
-remove_assume@[assume(P)]<=>compound(P)|[P]
+''@[assume(P)]<=>compound(P)|[P]
 分配@[P∨(Q∧R)]<=> \+P=Q|[P∨Q,P∨R]
-吸収@[P∨(P∧_20426)]<=>true|[assume(P)]
+吸収@[P∨(P∧_20420)]<=>true|[assume(P)]
 前件肯定_modus_ponens@[assume(P),P→Q]<=>true|[assume(Q)]
 後件否定_modus_tollens@[¬Q]\[P→Q]<=>true|[¬P]
 否定導入_not@[P→ ⊥]<=>true|[¬P]
-否定導入_not@[P→ ⊥(_20160)]<=>true|[¬P]
+否定導入_not@[P→ ⊥(_20154)]<=>true|[¬P]
 二重否定の除去_double_negative_elimination@[¬ ¬P]<=>true|[assume(P)]
 選言三段論法_disjunctive_syllogism@[¬P]\[P∨Q]<=>true|[assume(Q)]
 選言三段論法_disjunctive_syllogism2@[¬P]\[Q∨P]<=>true|[assume(Q)]
@@ -30,11 +30,11 @@ remove_assume@[assume(P)]<=>compound(P)|[P]
 導出_resolution@[L∨P,¬L∨Q]<=>L\=P,L\= ¬P,¬L\=P,L\=Q,L\= ¬Q,¬L\=Q|[P∨Q]
 ド_モルガンの法則_de_morgan_law@[¬ (P∨Q)]<=>true|[¬P∧ ¬Q]
 ド_モルガンの法則_de_morgan_law@[¬ (P∧Q)]<=>true|[¬P∨ ¬Q]
-計算開始@[X is A]<=> \+A=..[plus|_19106]|[X is plus([A])]
+計算開始@[X is A]<=> \+A=..[plus|_19100]|[X is plus([A])]
 計算完了@[X is plus([N])]<=>integer(N)|[X=N]
 分解@[X is plus([A+B|Y])]<=>true|[X is plus([A,B|Y])]
 '足し算(数値)'@[X is plus([N,M|Y])]<=>integer(N),integer(M),sum([N,M|Y],SumAndRest)|[X is plus(SumAndRest)]
-'掛け算(*0)'@[X is plus([_18626*0|Y])]<=>true|[X is plus(Y)]
+'掛け算(*0)'@[X is plus([_18620*0|Y])]<=>true|[X is plus(Y)]
 '掛け算(*1)'@[X is plus([A*1|Y])]<=>true|[X is plus([A|Y])]
 '掛け算(交換)'@[X is plus([N*A|Y])]<=>integer(N),\+integer(A)|[X is plus([A*N|Y])]
 '掛け算(帰納法)'@[X is plus([A*N|Y])]<=>integer(N),N>0,N1 is N-1|[X is plus([A*N1,A|Y])]
@@ -63,32 +63,16 @@ OK
 ############################################################
 a∨b∧(¬a∨c)∧(¬b∨c)∧ ¬c
 ---------------- 論理積の消去_conjunction_elimination ( [a∨b∧(¬a∨c)∧(¬b∨c)∧ ¬c] ⊢ [assume(a∨b∧(¬a∨c)∧(¬b∨c)),assume(¬c)] )
-assume(¬c), assume(a∨b∧(¬a∨c)∧(¬b∨c))
----------------- remove_assume ( [assume(¬c)] ⊢ [¬c] )
-assume(a∨b∧(¬a∨c)∧(¬b∨c)), ¬c
----------------- remove_assume ( [assume(a∨b∧(¬a∨c)∧(¬b∨c))] ⊢ [a∨b∧(¬a∨c)∧(¬b∨c)] )
 ¬c, a∨b∧(¬a∨c)∧(¬b∨c)
 ---------------- 論理積の消去_conjunction_elimination ( [a∨b∧(¬a∨c)∧(¬b∨c)] ⊢ [assume(a∨b∧(¬a∨c)),assume(¬b∨c)] )
-assume(a∨b∧(¬a∨c)), assume(¬b∨c), ¬c
----------------- remove_assume ( [assume(a∨b∧(¬a∨c))] ⊢ [a∨b∧(¬a∨c)] )
-assume(¬b∨c), ¬c, a∨b∧(¬a∨c)
----------------- remove_assume ( [assume(¬b∨c)] ⊢ [¬b∨c] )
 ¬c, a∨b∧(¬a∨c), ¬b∨c
 ---------------- 選言三段論法_disjunctive_syllogism2 ( [¬c] \ [¬b∨c] ⊢ [assume(¬b)] )
-assume(¬b), ¬c, a∨b∧(¬a∨c)
----------------- remove_assume ( [assume(¬b)] ⊢ [¬b] )
 ¬b, ¬c, a∨b∧(¬a∨c)
 ---------------- 論理積の消去_conjunction_elimination ( [a∨b∧(¬a∨c)] ⊢ [assume(a∨b),assume(¬a∨c)] )
-assume(a∨b), assume(¬a∨c), ¬b, ¬c
----------------- remove_assume ( [assume(a∨b)] ⊢ [a∨b] )
-assume(¬a∨c), ¬b, ¬c, a∨b
----------------- remove_assume ( [assume(¬a∨c)] ⊢ [¬a∨c] )
 ¬b, ¬c, a∨b, ¬a∨c
 ---------------- 選言三段論法_disjunctive_syllogism2 ( [¬b] \ [a∨b] ⊢ [assume(a)] )
 assume(a), ¬b, ¬c, ¬a∨c
 ---------------- 選言三段論法_disjunctive_syllogism2 ( [¬c] \ [¬a∨c] ⊢ [assume(¬a)] )
-assume(a), assume(¬a), ¬b, ¬c
----------------- remove_assume ( [assume(¬a)] ⊢ [¬a] )
 assume(a), ¬a, ¬b, ¬c
 ---------------- 矛盾律_contradiction ( [assume(a),¬a] ⊢ [⊥(a)] )
 ¬b, ¬c, ⊥(a)
@@ -100,28 +84,14 @@ OK
 ############################################################
 (a→b)∧(b→c)∧(c→d)∧a∧ ¬d
 ---------------- 論理積の消去_conjunction_elimination ( [(a→b)∧(b→c)∧(c→d)∧a∧ ¬d] ⊢ [assume((a→b)∧(b→c)∧(c→d)∧a),assume(¬d)] )
-assume(¬d), assume((a→b)∧(b→c)∧(c→d)∧a)
----------------- remove_assume ( [assume(¬d)] ⊢ [¬d] )
-assume((a→b)∧(b→c)∧(c→d)∧a), ¬d
----------------- remove_assume ( [assume((a→b)∧(b→c)∧(c→d)∧a)] ⊢ [(a→b)∧(b→c)∧(c→d)∧a] )
 ¬d, (a→b)∧(b→c)∧(c→d)∧a
 ---------------- 論理積の消去_conjunction_elimination ( [(a→b)∧(b→c)∧(c→d)∧a] ⊢ [assume((a→b)∧(b→c)∧(c→d)),assume(a)] )
-assume(a), assume((a→b)∧(b→c)∧(c→d)), ¬d
----------------- remove_assume ( [assume((a→b)∧(b→c)∧(c→d))] ⊢ [(a→b)∧(b→c)∧(c→d)] )
 assume(a), ¬d, (a→b)∧(b→c)∧(c→d)
 ---------------- 論理積の消去_conjunction_elimination ( [(a→b)∧(b→c)∧(c→d)] ⊢ [assume((a→b)∧(b→c)),assume(c→d)] )
-assume(a), assume(c→d), assume((a→b)∧(b→c)), ¬d
----------------- remove_assume ( [assume(c→d)] ⊢ [c→d] )
-assume(a), assume((a→b)∧(b→c)), ¬d, c→d
----------------- remove_assume ( [assume((a→b)∧(b→c))] ⊢ [(a→b)∧(b→c)] )
 assume(a), ¬d, c→d, (a→b)∧(b→c)
 ---------------- 後件否定_modus_tollens ( [¬d] \ [c→d] ⊢ [¬c] )
 assume(a), ¬c, ¬d, (a→b)∧(b→c)
 ---------------- 論理積の消去_conjunction_elimination ( [(a→b)∧(b→c)] ⊢ [assume(a→b),assume(b→c)] )
-assume(a), assume(a→b), assume(b→c), ¬c, ¬d
----------------- remove_assume ( [assume(a→b)] ⊢ [a→b] )
-assume(a), assume(b→c), ¬c, ¬d, a→b
----------------- remove_assume ( [assume(b→c)] ⊢ [b→c] )
 assume(a), ¬c, ¬d, a→b, b→c
 ---------------- 前件肯定_modus_ponens ( [assume(a),a→b] ⊢ [assume(b)] )
 assume(b), ¬c, ¬d, b→c
@@ -137,22 +107,10 @@ OK
 ############################################################
 a∨b∧(¬a∨b)∧(a∨ ¬b)∧(¬a∨ ¬b)
 ---------------- 論理積の消去_conjunction_elimination ( [a∨b∧(¬a∨b)∧(a∨ ¬b)∧(¬a∨ ¬b)] ⊢ [assume(a∨b∧(¬a∨b)∧(a∨ ¬b)),assume(¬a∨ ¬b)] )
-assume(a∨b∧(¬a∨b)∧(a∨ ¬b)), assume(¬a∨ ¬b)
----------------- remove_assume ( [assume(a∨b∧(¬a∨b)∧(a∨ ¬b))] ⊢ [a∨b∧(¬a∨b)∧(a∨ ¬b)] )
-assume(¬a∨ ¬b), a∨b∧(¬a∨b)∧(a∨ ¬b)
----------------- remove_assume ( [assume(¬a∨ ¬b)] ⊢ [¬a∨ ¬b] )
 a∨b∧(¬a∨b)∧(a∨ ¬b), ¬a∨ ¬b
 ---------------- 論理積の消去_conjunction_elimination ( [a∨b∧(¬a∨b)∧(a∨ ¬b)] ⊢ [assume(a∨b∧(¬a∨b)),assume(a∨ ¬b)] )
-assume(a∨b∧(¬a∨b)), assume(a∨ ¬b), ¬a∨ ¬b
----------------- remove_assume ( [assume(a∨b∧(¬a∨b))] ⊢ [a∨b∧(¬a∨b)] )
-assume(a∨ ¬b), a∨b∧(¬a∨b), ¬a∨ ¬b
----------------- remove_assume ( [assume(a∨ ¬b)] ⊢ [a∨ ¬b] )
 a∨b∧(¬a∨b), a∨ ¬b, ¬a∨ ¬b
 ---------------- 論理積の消去_conjunction_elimination ( [a∨b∧(¬a∨b)] ⊢ [assume(a∨b),assume(¬a∨b)] )
-assume(a∨b), assume(¬a∨b), a∨ ¬b, ¬a∨ ¬b
----------------- remove_assume ( [assume(a∨b)] ⊢ [a∨b] )
-assume(¬a∨b), a∨b, a∨ ¬b, ¬a∨ ¬b
----------------- remove_assume ( [assume(¬a∨b)] ⊢ [¬a∨b] )
 a∨b, a∨ ¬b, ¬a∨b, ¬a∨ ¬b
 ---------------- 導出_resolution ( [a∨b,¬a∨b] ⊢ [b∨b] )
 a∨ ¬b, b∨b, ¬a∨ ¬b
@@ -161,8 +119,6 @@ assume(b), a∨ ¬b, ¬a∨ ¬b
 ---------------- 導出_resolution ( [a∨ ¬b,¬a∨ ¬b] ⊢ [¬b∨ ¬b] )
 assume(b), ¬b∨ ¬b
 ---------------- 論理和の消去_disjunction_elimination ( [¬b∨ ¬b] ⊢ [assume(¬b)] )
-assume(b), assume(¬b)
----------------- remove_assume ( [assume(¬b)] ⊢ [¬b] )
 assume(b), ¬b
 ---------------- 矛盾律_contradiction ( [assume(b),¬b] ⊢ [⊥(b)] )
 ⊥(b)
@@ -174,34 +130,16 @@ OK
 ############################################################
 a∨b∨c∧(¬a∨b)∧(¬b∨c)∧ ¬c
 ---------------- 論理積の消去_conjunction_elimination ( [a∨b∨c∧(¬a∨b)∧(¬b∨c)∧ ¬c] ⊢ [assume(a∨b∨c∧(¬a∨b)∧(¬b∨c)),assume(¬c)] )
-assume(¬c), assume(a∨b∨c∧(¬a∨b)∧(¬b∨c))
----------------- remove_assume ( [assume(¬c)] ⊢ [¬c] )
-assume(a∨b∨c∧(¬a∨b)∧(¬b∨c)), ¬c
----------------- remove_assume ( [assume(a∨b∨c∧(¬a∨b)∧(¬b∨c))] ⊢ [a∨b∨c∧(¬a∨b)∧(¬b∨c)] )
 ¬c, a∨b∨c∧(¬a∨b)∧(¬b∨c)
 ---------------- 論理積の消去_conjunction_elimination ( [a∨b∨c∧(¬a∨b)∧(¬b∨c)] ⊢ [assume(a∨b∨c∧(¬a∨b)),assume(¬b∨c)] )
-assume(a∨b∨c∧(¬a∨b)), assume(¬b∨c), ¬c
----------------- remove_assume ( [assume(a∨b∨c∧(¬a∨b))] ⊢ [a∨b∨c∧(¬a∨b)] )
-assume(¬b∨c), ¬c, a∨b∨c∧(¬a∨b)
----------------- remove_assume ( [assume(¬b∨c)] ⊢ [¬b∨c] )
 ¬c, a∨b∨c∧(¬a∨b), ¬b∨c
 ---------------- 選言三段論法_disjunctive_syllogism2 ( [¬c] \ [¬b∨c] ⊢ [assume(¬b)] )
-assume(¬b), ¬c, a∨b∨c∧(¬a∨b)
----------------- remove_assume ( [assume(¬b)] ⊢ [¬b] )
 ¬b, ¬c, a∨b∨c∧(¬a∨b)
 ---------------- 論理積の消去_conjunction_elimination ( [a∨b∨c∧(¬a∨b)] ⊢ [assume(a∨b∨c),assume(¬a∨b)] )
-assume(¬a∨b), assume(a∨b∨c), ¬b, ¬c
----------------- remove_assume ( [assume(¬a∨b)] ⊢ [¬a∨b] )
-assume(a∨b∨c), ¬b, ¬c, ¬a∨b
----------------- remove_assume ( [assume(a∨b∨c)] ⊢ [a∨b∨c] )
 ¬b, ¬c, ¬a∨b, a∨b∨c
 ---------------- 選言三段論法_disjunctive_syllogism2 ( [¬b] \ [¬a∨b] ⊢ [assume(¬a)] )
-assume(¬a), ¬b, ¬c, a∨b∨c
----------------- remove_assume ( [assume(¬a)] ⊢ [¬a] )
 ¬a, ¬b, ¬c, a∨b∨c
 ---------------- 選言三段論法_disjunctive_syllogism2 ( [¬c] \ [a∨b∨c] ⊢ [assume(a∨b)] )
-assume(a∨b), ¬a, ¬b, ¬c
----------------- remove_assume ( [assume(a∨b)] ⊢ [a∨b] )
 ¬a, ¬b, ¬c, a∨b
 ---------------- 選言三段論法_disjunctive_syllogism ( [¬a] \ [a∨b] ⊢ [assume(b)] )
 assume(b), ¬a, ¬b, ¬c
@@ -215,14 +153,10 @@ OK
 ############################################################
 p∨q, ¬p∨r, ¬q∨r, ¬r
 ---------------- 選言三段論法_disjunctive_syllogism2 ( [¬r] \ [¬p∨r] ⊢ [assume(¬p)] )
-assume(¬p), ¬r, p∨q, ¬q∨r
----------------- remove_assume ( [assume(¬p)] ⊢ [¬p] )
 ¬p, ¬r, p∨q, ¬q∨r
 ---------------- 選言三段論法_disjunctive_syllogism ( [¬p] \ [p∨q] ⊢ [assume(q)] )
 assume(q), ¬p, ¬r, ¬q∨r
 ---------------- 選言三段論法_disjunctive_syllogism2 ( [¬r] \ [¬q∨r] ⊢ [assume(¬q)] )
-assume(q), assume(¬q), ¬p, ¬r
----------------- remove_assume ( [assume(¬q)] ⊢ [¬q] )
 assume(q), ¬p, ¬q, ¬r
 ---------------- 矛盾律_contradiction ( [assume(q),¬q] ⊢ [⊥(q)] )
 ¬p, ¬r, ⊥(q)
@@ -240,8 +174,6 @@ assume(q), p∨ ¬q, ¬p∨ ¬q
 ---------------- 導出_resolution ( [p∨ ¬q,¬p∨ ¬q] ⊢ [¬q∨ ¬q] )
 assume(q), ¬q∨ ¬q
 ---------------- 論理和の消去_disjunction_elimination ( [¬q∨ ¬q] ⊢ [assume(¬q)] )
-assume(q), assume(¬q)
----------------- remove_assume ( [assume(¬q)] ⊢ [¬q] )
 assume(q), ¬q
 ---------------- 矛盾律_contradiction ( [assume(q),¬q] ⊢ [⊥(q)] )
 ⊥(q)

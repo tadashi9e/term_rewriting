@@ -248,19 +248,21 @@ print_terms(Term, Terms) :-
  * @param Rules 適用したルールのリスト
  */
 trs_dump_history(InTerms, Rules) :-
-    print_terms(InTerms), nl,
+    %print_terms(InTerms), nl,
     reverse(Rules, RevRules),
-    dump_rules(RevRules).
-dump_rules([]).
-dump_rules([Rule|Rules]) :-
+    dump_rules(InTerms, RevRules).
+dump_rules(InTerms, []) :-
+    print_terms(InTerms), nl.
+dump_rules(InTerms, [Rule|Rules]) :-
     Rule =.. [RuleName, From1, From2, To, OutTerms],
-    write('---------------- '), write(RuleName), write(' ( '),
-    ( From1 = "[]"
-    -> write(From2)
-    ; write(From1), write(' \\ '), write(From2) ),
-    write(' ⊢ '), write(To), write(' )'), nl,
-    print_terms(OutTerms), nl,
-    dump_rules(Rules).
+    ( RuleName = ''
+    ; print_terms(InTerms), nl,
+      write('---------------- '), write(RuleName), write(' ( '),
+      ( From1 = "[]"
+      -> write(From2)
+      ; write(From1), write(' \\ '), write(From2) ),
+      write(' ⊢ '), write(To), write(' )'), nl ),
+    dump_rules(OutTerms, Rules).
 
 depth_of_term(T, D) :-
     ( compound(T)
