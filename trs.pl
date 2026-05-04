@@ -9,8 +9,10 @@
               trs_loop/4,
               trs_dump_history/2,
               max_depth_of_terms/2,
-              op(1150, xfy, '==>'),
-              op(1100, xfy, '@'),
+              op(1200, xfx, '@'),
+              op(1180, xfx, '<=>'),
+              op(1180, xfx, '==>'),
+              op(1105, xfy, '|'),
               op(1000, xfy, '⊢'),
               op(900, xfy, '→'),
               op(900, xfy, '⇔'),
@@ -66,11 +68,11 @@ report_singletons(Term, Vars,
              [Name, Str]) ),
     report_singletons(Term, Vars, RestSingletons).
 
-parse_rule(RuleName @ From ==> To :- Guards, Vars, ParsedRule) :-
+parse_rule((RuleName @ From <=> Guards | To), Vars, ParsedRule) :-
     tuple_to_list(From, FromList),
     tuple_to_list(To, ToList),
     ParsedRule = rule(RuleName, FromList, ToList, Guards, Vars).
-parse_rule(RuleName @ From ==> To, Vars, ParsedRule) :-
+parse_rule(RuleName @ From <=> To, Vars, ParsedRule) :-
     tuple_to_list(From, FromList),
     tuple_to_list(To, ToList),
     ParsedRule = rule(RuleName, FromList, ToList, true, Vars).
@@ -101,7 +103,7 @@ trs_dump_all_rules :-
     dump_all_rules(RuleBag).
 dump_all_rules([]).
 dump_all_rules([rule(RuleName, FromList, ToList, Guard, Vars)|RuleBag]) :-
-    term_string((RuleName @ FromList ==> ToList :- Guard), Str,
+    term_string((RuleName @ FromList <=> Guard | ToList), Str,
                 [variable_names(Vars)]),
     writeln(Str),
     dump_all_rules(RuleBag).
@@ -124,7 +126,7 @@ trs_abolish_all_rules :-
 trs_loop(InTerms, OutTerms, Rules, MaxSteps) :-
     ( trs_rules(_) ;
       format(user_error, 'error: ルールを読み込んでいません~n', []),
-      !, fail ),
+      !, fail ), !,
     sort(InTerms, InTerms2),
     trs_loop_aux(InTerms2, OutTerms, Rules, MaxSteps).
 trs_loop_aux(InTerms, OutTerms, Rules, MaxSteps) :-

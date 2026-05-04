@@ -41,7 +41,7 @@ test2 :-
     trs_resolve([ (a ∨ b)
                   ∧ (¬a ∨ c)
                   ∧ (¬b ∨ c)
-                  ∧ (¬c) ], OutTerms), !,
+                  ∧ (¬c) ], OutTerms, 100, 100), !,
     writeln(OutTerms),
     OutTerms = [⊥].
 test3 :-

@@ -1,48 +1,51 @@
 % -*- mode: prolog; coding: utf-8-unix -*-
 
+remove_assume @ assume(P) <=> compound(P) | P.
+
 分配 @
-P ∨ (Q ∧ R) ==> P ∨ Q, P ∨ R :- \+ P = Q.
+P ∨ (Q ∧ R) <=> \+ P = Q | P ∨ Q, P ∨ R.
 
 吸収 @
-P ∨ (P ∧ _) ==> P.
+P ∨ (P ∧ _) <=> assume(P).
 
 前件肯定_modus_ponens @
-P, P → Q ==> Q.
+assume(P), (P → Q) <=> assume(Q).
 
 後件否定_modus_tollens @
-¬ Q, P → Q ==> ¬ Q, ¬ P.
+¬ Q, (P → Q) <=> ¬ Q, ¬ P.
 
 否定導入_not @
-P → ⊥ ==> ¬ P.
+P → ⊥ <=> ¬ P.
 否定導入_not @
-P → ⊥(_) ==> ¬ P.
+P → ⊥(_) <=> ¬ P.
 
 二重否定の除去_double_negative_elimination @
-¬ ¬ P ==> P.
+¬ ¬ P <=> assume(P).
 
 選言三段論法_disjunctive_syllogism @
-P ∨ Q, ¬ P ==> Q, ¬ P.
+P ∨ Q, ¬ P <=> assume(Q), ¬ P.
 
 仮言三段論法_hypothetical_syllogism @
-P → Q, Q → R ==> P → R.
+P → Q, Q → R <=> P → R.
 
 論理和の消去_disjunction_elimination @
-P → Q, R → Q, P ∨ R ==> Q.
+P → Q, R → Q, P ∨ R <=> assume(Q).
 
 論理和の消去_disjunction_elimination @
-P ∨ P ==> P.
+P ∨ P <=> assume(P).
 
 論理積の消去_conjunction_elimination @
-P ∧ Q ==> P, Q.
+P ∧ Q <=> assume(P), assume(Q).
 
 論理積の消去_conjunction_elimination @
-P, P ==> P.
+assume(P), assume(P) <=> assume(P).
 
 矛盾律_contradiction @
-A, ¬ A ==> ⊥(A).
+assume(A), ¬ A <=> ⊥(A).
 
 導出_resolution @
-L ∨ P, ¬ L ∨ Q ==> P ∨ Q
-:- L \= P, L \= ¬ P, ¬ L \= P,
-   L \= Q, L \= ¬ Q, ¬ L \= Q.
+L ∨ P, ¬ L ∨ Q <=>
+    L \= P, L \= ¬ P, ¬ L \= P, L \= Q, L \= ¬ Q, ¬ L \= Q |
+    P ∨ Q.
+
 
