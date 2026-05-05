@@ -1,4 +1,25 @@
 % -*- mode: prolog; coding: utf-8-unix -*-
+/**
+ * SWI-Prolog の CHR モジュールを使った積と和の計算。
+ *
+ * 使用方法:
+ *    このファイルを consult した状態で以下のクエリを投入し、
+ *    それぞれ解が得られることを確認する。
+ *
+ * x := 1.
+ *   → x equals 1.
+ * x := (1 + 2) * 3.
+ *   → x equals 9.
+ * x := (2+3)*(4+5).
+ *   → x equals 45.
+ */
+:- use_module(library(chr)).
+
+:- chr_constraint (:=)/2.  % 数式処理の指示
+:- chr_constraint equals/2.  % 数式処理結果
+
+:- op(700, xfx, ':=').  % 数式処理の指示
+:- op(700, xfx, equals).  % 数式処理結果
 
 '計算開始' @
 X := A <=>
@@ -19,11 +40,11 @@ X := plus([N,M|Y]) <=>
      integer(N), integer(M), sum([N,M|Y], SumAndRest) |
 X := plus(SumAndRest).
 
-abol:=h(sum/2).
-assert((sum([N,M|In], Out)
-        :- integer(N), integer(M), NM is N + M,
-           sum([NM|In], Out))).
-assert(sum(N, N)).
+% ユーティリティ述語
+sum([N,M|In], Out) :-
+    integer(N), integer(M), !,
+    NM is N + M, sum([NM|In], Out).
+sum(N, N).
 
 '掛け算(*0)' @
 X := plus([_*0|Y]) <=>

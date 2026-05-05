@@ -49,5 +49,3 @@ assume(A), ¬ A <=> ⊥(A).
 L ∨ P, ¬ L ∨ Q <=>
     L \= P, L \= ¬ P, ¬ L \= P, L \= Q, L \= ¬ Q, ¬ L \= Q |
     P ∨ Q.
-
-

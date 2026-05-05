@@ -94,35 +94,35 @@ test9 :-
     OutTerms = [q∨ ¬q].
 
 test_calc1 :-
-    trs_resolve([x is 1], OutTerms), !,
-    OutTerms = [x=1].
+    trs_resolve([x := 1], OutTerms), !,
+    OutTerms = [x equals 1].
 test_calc2 :-
-    trs_resolve([x is 1+2], OutTerms), !,
-    OutTerms = [x=3].
+    trs_resolve([x := 1+2], OutTerms), !,
+    OutTerms = [x equals 3].
 test_calc3 :-
-    trs_resolve([x is 1+2+3], OutTerms), !,
-    OutTerms = [x=6].
+    trs_resolve([x := 1+2+3], OutTerms), !,
+    OutTerms = [x equals 6].
 test_calc4 :-
-    trs_resolve([x is 2*3*4], OutTerms), !,
-    OutTerms = [x=24].
+    trs_resolve([x := 2*3*4], OutTerms), !,
+    OutTerms = [x equals 24].
 test_calc5 :-
-    trs_resolve([x is 2*(3*2)], OutTerms), !,
-    OutTerms = [x=12].
+    trs_resolve([x := 2*(3*2)], OutTerms), !,
+    OutTerms = [x equals 12].
 test_calc6 :-
-    trs_resolve([x is 2*(2*(2*2))], OutTerms), !,
-    OutTerms = [x=16].
+    trs_resolve([x := 2*(2*(2*2))], OutTerms), !,
+    OutTerms = [x equals 16].
 test_calc7 :-
-    trs_resolve([x is 2*(3+4)], OutTerms), !,
-    OutTerms = [x=14].
+    trs_resolve([x := 2*(3+4)], OutTerms), !,
+    OutTerms = [x equals 14].
 test_calc8 :-
-    trs_resolve([x is (3+4*2)*2], OutTerms), !,
-    OutTerms = [x=22].
+    trs_resolve([x := (3+4*2)*2], OutTerms), !,
+    OutTerms = [x equals 22].
 test_calc9 :-
-    trs_resolve([x is 2*(3+4*2)], OutTerms), !,
-    OutTerms = [x=22].
+    trs_resolve([x := 2*(3+4*2)], OutTerms), !,
+    OutTerms = [x equals 22].
 test_calc10 :-
-    trs_resolve([x is (2+3)*(4+5)], OutTerms), !,
-    OutTerms = [x=45].
+    trs_resolve([x := (2+3)*(4+5)], OutTerms), !,
+    OutTerms = [x equals 45].
 test_calc11 :-
-    trs_resolve([x is 3*4*5], OutTerms), !,
-    OutTerms = [x=60].
+    trs_resolve([x := 3*4*5], OutTerms), !,
+    OutTerms = [x equals 60].
