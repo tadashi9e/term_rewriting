@@ -39,7 +39,8 @@
  */
 trs_load_rules(File) :-
     ( \+ exists_file(File)
-    -> format(user_error, 'error: ルールファイルが見つかりません: ~w~n', [File]),
+    -> format(user_error,
+              'error: ルールファイルが見つかりません: ~w~n', [File]),
        !, fail
     ; true
     ),
@@ -54,7 +55,7 @@ read_all_rules(Stream, Rules) :-
                singletons(Singletons)]),
     report_singletons(Rule, Vars, Singletons),
     ( Rule = end_of_file -> Rules = []
-    ; debug(trs, ':~p', Rule),
+    ; debug(trs, '~p: ~p', [read_all_rules/2, Rule]),
       parse_rule(Rule, Vars, ParsedRule),
       (ParsedRule = [] -> Rules2 = Rules
       ; Rules = [ParsedRule | Rules2]),
@@ -188,7 +189,8 @@ contains_bottom(Terms) :-
 find_rule_and_apply(InTerms, OutTerms, Rule) :-
     trs_rules(rule(RuleName, From1, From2, To, Guards, Vars)),
     apply_rule(InTerms, OutTerms, From1, From2, Guards, To),
-    debug(trs, ':~p', (RuleName, From1, From2, To)),
+    debug(trs, '~p: ~p',
+          [find_rule_and_apply/3, (RuleName, From1, From2, To)]),
     term_string(From1, From1Str, [variable_names(Vars)]),
     term_string(From2, From2Str, [variable_names(Vars)]),
     term_string(To, ToStr, [variable_names(Vars)]),
@@ -196,45 +198,75 @@ find_rule_and_apply(InTerms, OutTerms, Rule) :-
 
 /**
  * 与えられた規則にマッチする項がリストにあれば、置き換える。
+ * 1. まずルールに基づくパターンマッチを行い、
+ * 2. パターンが合致すれば単一化を試みる。
+ * 3. 単一化に成功すればガードチェックを行い、
+ * 4. 成功すればルール適用として記録する。
  */
-apply_rule(InTerms, OutTerms, FromRule1, FromRule2, Guards, ToRule) :-
-    match_list(FromRule1, InTerms),
-    replace_list(FromRule2, InTerms, AppliedTerms),
+apply_rule(InTerms, OutTerms, FromRule1, FromRule2, Guards, ToTerms) :-
+    % パターンマッチ
+    match_rules(FromRule1, InTerms, AppliedTerms1, RestTerms1, Unifiers1-[]),
+    match_rules(FromRule2, RestTerms1, _, RestTerms2, Unifiers2-Unifiers1),
+    debug(trs, '~p: ~p~n',
+          [apply_rule/6,
+           ['InTerms'=InTerms,
+            'FromRule1'=FromRule1, 'FromRule2'=FromRule2,
+            'Unifiers2'=Unifiers2]]),
+    % 単一化
+    execute_unify(Unifiers2),
+    % ガードチェック
     check_guard(Guards),
-    append(AppliedTerms, ToRule, RawOutTerms),
-    %\+ tautology_clause(RawOutTerms),  % トートロジー除去
+    % 結果収集
+    append(AppliedTerms1, RestTerms2, Ts),
+    append(Ts, ToTerms, RawOutTerms),
     normalize_terms(RawOutTerms, OutTerms).
 normalize_terms(Terms, Normalized) :-
     sort(Terms, Normalized).  % 重複除去
 
 /**
- * トートロジー
+ * 条件リストの要素が入力項リストの項にマッチするかチェックする。
+ * マッチする入力項は MatchedTerms に返す。
+ * マッチしなかった入力項は RestTerms に返す。
+ * マッチした条件と項のペアについてリストを返し、後続処理で単一化を遅延実行する。
  */
-tautology_clause(Clause) :-
-    member(L, Clause),
-    neg(L, NL),
-    member(NL, Clause).
-neg(¬A, A).
-neg(A, ¬A).
+match_rules([], Terms, [], Terms, Unifiers-Unifiers).
+match_rules([P|Ps], InTerms, MatchedTerms, RestTerms, Unifiers-Unifiers0) :-
+    match_rule(P, InTerms, MatchedTerm, RestTerms1, Unifier),
+    MatchedTerms = [MatchedTerm|MatchedTerms2],
+    Unifiers2 = [Unifier|Unifiers0],
+    match_rules(Ps, RestTerms1, MatchedTerms2, RestTerms, Unifiers-Unifiers2).
 
 /**
- * 条件リストの各項が入力項リストに含まれているかチェックする。
- * （CHRの条件チェック。項は消費されない）
+ * パターン Pattern にマッチする項が Terms にあるか調べ、あるなら
+ * 候補として MatchedTerm に返す。候補以外の項は RestTerms に返す。
+ * 実際の単一化は Unifier を実行するまで遅延させる。
  */
-match_list([], _).
-match_list([M|Ms], Terms) :-
-    member(M, Terms),
-    match_list(Ms, Terms).
+match_rule(Pattern, Terms, MatchedTerm, RestTerms, Unifier) :-
+    select(MatchedTerm, Terms, RestTerms),
+    pattern_match(Pattern, MatchedTerm),
+    Unifier = unify_with_occurs_check(Pattern, MatchedTerm).
+/**
+ * 項 Term がパターン Pattern にマッチするか調べる。
+ * Pattern と Term の内容がそれぞれ書き変わるのを防ぐため、
+ * ここでは単一化を実行せず、マッチするかどうかだけをチェックする。
+ */
+pattern_match(Pattern, Term) :-
+    atomic(Pattern), atomic(Term), !, Pattern = Term.
+pattern_match(Pattern, _) :-
+    var(Pattern), !.
+pattern_match(Pattern, Term) :-
+    nonvar(Pattern), nonvar(Term),
+    Pattern =.. [F|Ps], Term =.. [F|Ts],
+    maplist(pattern_match, Ps, Ts).
 
 /**
- * 与えられた規則にマッチする項を単一化した上でリストから除去する。
- * （CHRの削除。書き換え前の各項を順に削除）
+ * パターンマッチ後の単一化処理。
  */
-replace_list([], Terms, Terms).
-replace_list([M|Ms], InTerms, OutTerms) :-
-    select(M, InTerms, Ts),
-    replace_list(Ms, Ts, OutTerms).
+execute_unify(Unifiers) :- maplist(call, Unifiers).
 
+/**
+ * 単一化後のガードチェック。
+ */
 check_guard(Guards) :- call(Guards).
 
 print_terms([]).

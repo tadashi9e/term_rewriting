@@ -11,6 +11,7 @@ setup :-
 
 test :-
     Tests = [test1, test2, test3, test4, test5, test6, test7, test8, test9,
+             test11, % test12,
              test_calc1, test_calc2, test_calc3, test_calc4, test_calc5,
              test_calc6, test_calc7, test_calc8,test_calc9, test_calc10,
              test_calc11],
@@ -37,11 +38,22 @@ test1 :-
     trs_resolve([a → b, b → c, c → d], OutTerms), !,
     writeln(OutTerms),
     OutTerms = [a→d].
+test11 :-
+    trs_resolve([A → B, B → C, C → D], OutTerms), !,
+    writeln(OutTerms),
+    OutTerms = [A→D].
 test2 :-
     trs_resolve([ (a ∨ b)
                   ∧ (¬a ∨ c)
                   ∧ (¬b ∨ c)
                   ∧ (¬c) ], OutTerms), !,
+    writeln(OutTerms),
+    OutTerms = [⊥].
+test12 :-
+    trs_resolve([ (A ∨ B)
+                  ∧ (¬A ∨ C)
+                  ∧ (¬B ∨ C)
+                  ∧ (¬C) ], OutTerms), !,
     writeln(OutTerms),
     OutTerms = [⊥].
 test3 :-
