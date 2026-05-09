@@ -9,8 +9,7 @@
               trs_resolve/5,
               trs_loop/4,
               trs_loop/5,
-              trs_dump_history/2,
-              trs_dump_history/3,
+              trs_dump_history/1,
               max_depth_of_terms/2,
               op(1200, xfx, '@'),
               op(1180, xfx, '<=>'),
@@ -152,35 +151,35 @@ trs_abolish_all_rules :-
  * 項書換えルールを適用して、項リストを解決する。
  * @param InTerms 書換え前の項リスト
  * @param OutTerms 書換え後の項リスト
- * @param Rules 適用したルールのリスト
+ * @param History 適用したルールのリスト
  * @param Vars ダンプ時に用いる変数名と変数のマッピング（「名前-変数」のリスト）
  */
-trs_loop(InTerms, OutTerms, Rules, MaxSteps) :-
-    trs_loop(InTerms, OutTerms, Rules, MaxSteps, []).
-trs_loop(InTerms, OutTerms, Rules, MaxSteps, Vars) :-
+trs_loop(InTerms, OutTerms, History, MaxSteps) :-
+    trs_loop(InTerms, OutTerms, History, MaxSteps, []).
+trs_loop(InTerms, OutTerms, History, MaxSteps, Vars) :-
     ( trs_rules(_) ;
       format(user_error, 'error: ルールを読み込んでいません~n', []),
       !, fail ), !,
-    sort(InTerms, InTerms2),
-    trs_loop_aux(InTerms2, OutTerms, Rules, MaxSteps, Vars).
-trs_loop_aux(InTerms, OutTerms, Rules, MaxSteps, Vars) :-
-    trs_loop_aux(InTerms, OutTerms, Rules, [], [], 0, MaxSteps, Vars).
-trs_loop_aux(InTerms, [⊥], Rules, _, RA, _, _, _) :-  % ⊥(_) が出現したら停止
+    msort(InTerms, InTerms2),
+    trs_loop_aux(InTerms2, OutTerms, History, MaxSteps, Vars).
+trs_loop_aux(InTerms, OutTerms, History, MaxSteps, Vars) :-
+    trs_loop_aux(InTerms, OutTerms, History, [], [], 0, MaxSteps, Vars).
+trs_loop_aux(InTerms, [⊥], History, _, RA, _, _, _) :-  % ⊥(_) が出現したら停止
     contains_bottom(InTerms),
-    Rules = RA.
-trs_loop_aux(InTerms, OutTerms, Rules, Seen, RA, _, _, _) :-
+    History = RA.
+trs_loop_aux(InTerms, OutTerms, History, Seen, RA, _, _, _) :-
     member(InTerms, Seen),  % 無限ループ回避
     OutTerms = InTerms,
-    Rules = RA.
-trs_loop_aux(InTerms, OutTerms, Rules, Seen, RA, Steps, MaxSteps, Vars) :-
+    History = RA.
+trs_loop_aux(InTerms, OutTerms, History, Seen, RA, Steps, MaxSteps, Vars) :-
     Steps < MaxSteps,
-    find_rule_and_apply(InTerms, InTerms2, Rule, Vars),
-    sort(InTerms2, InTerms3),
+    find_rule_and_apply(InTerms, InTerms2, AppliedRule, Vars),
+    msort(InTerms2, InTerms3),
     Steps1 is Steps + 1,
-    trs_loop_aux(InTerms3, OutTerms, Rules,
-                 [InTerms|Seen], [Rule|RA], Steps1, MaxSteps, Vars).
-trs_loop_aux(InTerms, OutTerms, Rules, _, RA, _, _, _) :-
-    OutTerms = InTerms, Rules = RA.
+    trs_loop_aux(InTerms3, OutTerms, History,
+                 [InTerms|Seen], [AppliedRule|RA], Steps1, MaxSteps, Vars).
+trs_loop_aux(InTerms, OutTerms, History, _, RA, _, _, _) :-
+    OutTerms = InTerms, History = RA.
 
 /**
  * Terms に ⊥(_) が含まれているかチェックする。
@@ -192,7 +191,8 @@ contains_bottom(Terms) :-
  * 与えられた項リストにマッチする規則を探して、
  * 適用した結果リストと適用したルール名を返す。
  */
-find_rule_and_apply(InTerms, OutTerms, Rule, GivenVars) :-
+find_rule_and_apply(InTerms, OutTerms, AppliedRule, GivenVars) :-
+    term_strings(InTerms, InStr, [variable_names(GivenVars)]),
     trs_rules(rule(RuleName, From1, From2, To, Guards, Vars)),
     apply_rule(InTerms, OutTerms, From1, From2, Guards, To),
     debug(trs, '~p: ~p',
@@ -201,7 +201,22 @@ find_rule_and_apply(InTerms, OutTerms, Rule, GivenVars) :-
     term_string(From1, From1Str, [variable_names(Vars2)]),
     term_string(From2, From2Str, [variable_names(Vars2)]),
     term_string(To, ToStr, [variable_names(Vars2)]),
-    Rule =.. [RuleName, From1Str, From2Str, ToStr, OutTerms].
+    term_strings(OutTerms, OutStr, [variable_names(Vars2)]),
+    AppliedRule =.. [RuleName, InStr, From1Str, From2Str, ToStr, OutStr].
+
+/**
+ * term_string/3 とほぼ同じ。但し、リストをカンマ区切り文字列として返す。
+ */
+term_strings([], "", _).
+term_strings([T|Ts], Str, Args) :-
+    term_string(T, S, Args),
+    term_strings(Ts, Str, Args, S).
+term_strings([], Str, _, Str).
+term_strings([T|Ts], Str, Args, Ac) :-
+    term_string(T, S, Args),
+    string_concat(Ac, ", ", Ac1),
+    string_concat(Ac1, S, Ac2),
+    term_strings(Ts, Str, Args, Ac2).
 
 /**
  * 与えられた規則にマッチする項がリストにあれば、置き換える。
@@ -238,33 +253,42 @@ normalize_terms(Terms, Normalized) :-
  */
 match_rules([], Terms, [], Terms, Unifiers-Unifiers).
 match_rules([P|Ps], InTerms, MatchedTerms, RestTerms, Unifiers-Unifiers0) :-
-    match_rule(P, InTerms, MatchedTerm, RestTerms1, Unifier),
+    match_rule(P, InTerms, MatchedTerm, RestTerms1, Unifiers1-Unifiers0),
     MatchedTerms = [MatchedTerm|MatchedTerms2],
-    Unifiers2 = [Unifier|Unifiers0],
-    match_rules(Ps, RestTerms1, MatchedTerms2, RestTerms, Unifiers-Unifiers2).
+    match_rules(Ps, RestTerms1, MatchedTerms2, RestTerms, Unifiers-Unifiers1).
 
 /**
  * パターン Pattern にマッチする項が Terms にあるか調べ、あるなら
  * 候補として MatchedTerm に返す。候補以外の項は RestTerms に返す。
  * 実際の単一化は Unifier を実行するまで遅延させる。
  */
-match_rule(Pattern, Terms, MatchedTerm, RestTerms, Unifier) :-
+match_rule(Pattern, Terms, MatchedTerm, RestTerms, Unifiers-Unifiers0) :-
     select(MatchedTerm, Terms, RestTerms),
-    pattern_match(Pattern, MatchedTerm),
-    Unifier = unify_with_occurs_check(Pattern, MatchedTerm).
+    pattern_match(Pattern, MatchedTerm, Unifiers-Unifiers0).
 /**
  * 項 Term がパターン Pattern にマッチするか調べる。
  * Pattern と Term の内容がそれぞれ書き変わるのを防ぐため、
  * ここでは単一化を実行せず、マッチするかどうかだけをチェックする。
  */
-pattern_match(Pattern, Term) :-
+pattern_match(Pattern, Term, Unifiers-Unifiers) :-
     atomic(Pattern), atomic(Term), !, Pattern = Term.
-pattern_match(Pattern, _) :-
-    var(Pattern), !.
-pattern_match(Pattern, Term) :-
+pattern_match(Pattern, Term, Unifiers-Unifiers0) :-
+    var(Pattern), !, Unifiers = [point_to(Pattern, Term)|Unifiers0].
+pattern_match(Pattern, Term, Unifiers-Unifiers0) :-
     nonvar(Pattern), nonvar(Term),
     Pattern =.. [F|Ps], Term =.. [F|Ts],
-    maplist(pattern_match, Ps, Ts).
+    pattern_match_aux(Ps, Ts, Unifiers-Unifiers0).
+
+pattern_match_aux([], [], Unifiers-Unifiers).
+pattern_match_aux([P|Ps], [T|Ts], Unifiers-Unifiers0) :-
+    pattern_match(P, T, Unifiers1-Unifiers0),
+    pattern_match_aux(Ps, Ts, Unifiers-Unifiers1).
+
+/**
+ * ルールに現れる変数 P を入力項に現れる値 T に結びつける。
+ */
+point_to(P, T) :- var(P), !, unify_with_occurs_check(P, T).
+point_to(P, T) :- nonvar(P), !, P == T.
 
 /**
  * パターンマッチ後の単一化処理。
@@ -286,33 +310,24 @@ print_terms(Term, Terms, Vars) :-
 
 /**
  * 項書換え履歴を表示する。
- * @param InTerms 項書換え開始前の項リスト
  * @param Rules 適用したルールのリスト
- * @param Vars 表示に用いる変数名と変数のマッピング（「名前-変数」のリスト）
  */
-trs_dump_history(InTerms, Rules) :-
-    trs_dump_history(InTerms, Rules, []).
-trs_dump_history(InTerms, Rules, Vars) :-
+trs_dump_history(Rules) :-
     reverse(Rules, RevRules),
-    dump_rules(InTerms, RevRules, Vars).
-dump_rules(InTerms, [], Vars) :-
-    print_terms(InTerms, Vars), nl.
-dump_rules(InTerms, [Rule|Rules], Vars) :-
-    Rule =.. [RuleName, From1, From2, To, OutTerms],
+    dump_rules(RevRules).
+dump_rules([]).
+dump_rules([Rule|Rules]) :-
+    Rule =.. [RuleName, InStr, From1Str, From2Str, ToStr, OutStr],
     ( RuleName = ''
-    ; print_terms(InTerms, Vars), nl,
+    ; writeln(InStr),
       write('---------------- '),
-      ( From1 = "[]"
-      -> format('~s ( ~W ⊢ ~W )~n',
-                [RuleName,
-                 From2, [variable_names(Vars)],
-                 To, [variable_names(Vars)]])
-      ; format('~s ( ~W \\ ~W ⊢ ~W )~n',
-               [RuleName,
-                From1, [variable_names(Vars)],
-                From2, [variable_names(Vars)],
-                To, [variable_names(Vars)]]) ) ),
-    dump_rules(OutTerms, Rules, Vars).
+      ( From1Str = "[]"
+      -> format('~s ( ~s ⊢ ~s )~n',
+                [RuleName, From2Str, ToStr])
+      ; format('~s ( ~s \\ ~s ⊢ ~s )~n',
+               [RuleName, From1Str, From2Str, ToStr]) ) ),
+    ( Rules = [] -> writeln(OutStr)
+    ; dump_rules(Rules) ).
 
 depth_of_term(T, D) :-
     ( compound(T)
@@ -340,8 +355,8 @@ trs_resolve(InTerms, OutTerms) :-
 trs_resolve(InTerms, OutTerms, MaxSteps, MaxDepth) :-
     trs_resolve(InTerms, OutTerms, MaxSteps, MaxDepth, []).
 trs_resolve(InTerms, OutTerms, MaxSteps, MaxDepth, Vars) :-
-    trs_loop(InTerms, OutTerms, Rules, MaxSteps, Vars),
+    trs_loop(InTerms, OutTerms, History, MaxSteps, Vars),
     max_depth_of_terms(OutTerms, Depth),
     Depth =< MaxDepth,
     !,
-    trs_dump_history(InTerms, Rules, Vars), nl.
+    trs_dump_history(History), nl.
