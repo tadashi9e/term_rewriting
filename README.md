@@ -70,7 +70,10 @@
 - `trs_dump_all_rules` - 読み込んだルール全てを表示する。
 - `trs_abolish_all_rules` - 読み込んだルール全てを破棄する。
 - `trs_loop(InTerms, OutTerms, Rules, MaxSteps)` - InTerms (list) に対してルールを最大 MaxSteps (integer) 回適用し、結果を OutTerms (list)、適用ルール履歴を Rules (list) として得る。
+- `trs_loop(InTerms, OutTerms, Rules, MaxSteps, Vars)` - `trs_loop/4` に「名前-変数」のリストを追加したもの。追加した引数は変数名の表示に用いる。
 - `trs_dump_history(InTerms, Rules)` - `trs_loop/4` 実行の履歴をダンプする。
+- `trs_dump_history(InTerms, Rules, Vars)` - `trs_dump_history/2` に「名前-変数」のリストを追加したもの。追加した引数は変数名の表示に用いる。
 - `max_depth_of_terms(Terms, Depth)` - 項の最大深さを返す。
 - `trs_resolve(InTerms, OutTerms, MaxSteps, MaxDepth)` - 最終結果の項の最大深さを MaxDepth (integer) に制限したうえで `trs_loop/4` を使ってルール適用を行い、その結果を `trs_dump_history/2` で表示する。
 - `trs_resolve(InTerms, OutTerms)` - MaxSteps=100, MaxDepth=2 でデフォルト実行する。
+- `trs_resolve(InTerms, OutTerms, MaxSteps, MaxDepth, Vars)` - `trs_resolve/4` に「名前-変数」のリストを追加したもの。追加した引数は変数名の表示に用いる。

@@ -39,8 +39,9 @@ test1 :-
     writeln(OutTerms),
     OutTerms = [a→d].
 test11 :-
-    trs_resolve([A → B, B → C, C → D], OutTerms), !,
-    writeln(OutTerms),
+    Vars = ['A'=A, 'B'=B, 'C'=C, 'D'=D],
+    trs_resolve([A → B, B → C, C → D], OutTerms, 10, 10, Vars), !,
+    format('~W~n', [OutTerms, [variable_names(Vars)]]),
     OutTerms = [A→D].
 test2 :-
     trs_resolve([ (a ∨ b)
