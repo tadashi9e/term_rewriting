@@ -160,8 +160,17 @@ trs_loop(InTerms, OutTerms, History, MaxSteps, Vars) :-
     ( trs_rules(_) ;
       format(user_error, 'error: ルールを読み込んでいません~n', []),
       !, fail ), !,
-    msort(InTerms, InTerms2),
-    trs_loop_aux(InTerms2, OutTerms, History, MaxSteps, Vars).
+    term_variables(InTerms, InVariables),
+    % InTerms に含まれる変数を内部表現に書き換えた InTerms2 を得る
+    msort(InTerms, InTerms1),
+    create_variable_mapping(InVariables, InVariablesMapping),
+    copy_term([InTerms1, InVariablesMapping, Vars],
+              [InTerms2, InVariablesMapping2, Vars2]),
+    apply_variable_mapping(InVariablesMapping2, Vars2, Vars),
+    trs_loop_aux(InTerms2, OutTerms2, History, MaxSteps, Vars),
+    % OutTerms に含まれる内部表現変数を元の変数に戻す
+    back_variables(OutTerms2, OutTerms).
+
 trs_loop_aux(InTerms, OutTerms, History, MaxSteps, Vars) :-
     trs_loop_aux(InTerms, OutTerms, History, [], [], 0, MaxSteps, Vars).
 trs_loop_aux(InTerms, [⊥], History, _, RA, _, _, _) :-  % ⊥(_) が出現したら停止
@@ -182,6 +191,86 @@ trs_loop_aux(InTerms, OutTerms, History, _, RA, _, _, _) :-
     OutTerms = InTerms, History = RA.
 
 /**
+ * 内部変数管理表を作る。「変数-番号」のリスト。
+ */
+create_variable_mapping(InVariables, InVariablesMapping) :-
+    create_variable_mapping_aux(InVariables, InVariablesMapping, 0).
+create_variable_mapping_aux([], [], _).
+create_variable_mapping_aux([V|Vs], [V-N|Ms], N) :-
+    N1 is N + 1,
+    create_variable_mapping_aux(Vs, Ms, N1).
+
+/**
+ * 内部変数管理表上の変数を、'$__trs_var__'(内部管理番号, 変数名, 変数) に変換する。
+ * 変数名が与えられていない場合には、空文字列を用いる。
+ */
+apply_variable_mapping([], _, _).
+apply_variable_mapping([V-N|Ms], Vars, OldVars) :-
+    find_var_name(Vars, V, Name),
+    find_name_var(OldVars, Name, OldVar),
+    V = '$__trs_var__'(N, Name, OldVar),
+    apply_variable_mapping(Ms, Vars, OldVars).
+
+/**
+ * 「変数名=変数」のリストに従って、変数に対応する名称を得る。
+ */
+find_var_name([], _, '').  % not found
+find_var_name([Name=Var|_], V, Name) :- Var == V, !.
+find_var_name([_|Vars], Var, Name) :- find_var_name(Vars, Var, Name).
+
+/**
+ * 変数名=変数のリストに従って、名称に対応する変数を得る。
+ */
+find_name_var([], _, _).  % not found
+find_name_var([Name=Var|_], Name, Var).
+find_name_var([_|Vars], Name, Var) :- find_name_var(Vars, Name, Var).
+
+/**
+ * '$__trs_var__'(内部管理番号, 変数名) に変換された変数を、元の変数に戻す。
+ */
+back_variables(V, V2) :-
+    var(V), !, V2 = V.
+back_variables([T|Ts], [T2|Ts2]) :-
+    !,
+    back_variables(T, T2),
+    back_variables(Ts, Ts2).
+back_variables('$__trs_var__'(_, _, V), V) :-
+    !.
+back_variables(T, T2) :-
+    atomic(T), T2 = T.
+back_variables(T, T2) :-
+    T =.. [F|Args],
+    !,
+    length(Args, Arity), length(Args2, Arity),
+    T2 =.. [F|Args2],
+    back_variables(Args, Args2).
+
+trs_terms_to_string([], "", _) :- !.
+trs_terms_to_string([T|Ts], Str, Vars) :-
+    trs_term_to_string(T, S1, Vars),
+    trs_terms_to_string_aux(Ts, Str, Vars, S1), !.
+trs_terms_to_string(Terms, Str, Vars) :-
+    format(user_error, 'failed to execute ~p~n',
+           [trs_terms_to_string(Terms, Str, Vars)]).
+
+trs_terms_to_string_aux([], Str, _, Str).
+trs_terms_to_string_aux([T|Ts], Str, Vars, Ac) :-
+    trs_term_to_string(T, S1, Vars),
+    format(string(Ac2), '~s, ~s', [Ac, S1]),
+    trs_terms_to_string_aux(Ts, Str, Vars, Ac2).
+trs_terms_to_string_aux(Term, Str, Vars, Str) :-
+    format(user_error, 'failed to execute ~p~n',
+           [trs_terms_to_string_aux(Term, Str, Vars, Str)]).
+
+trs_term_to_string(Term, Str, Vars) :-
+    copy_term([Term, Vars], [Term2, Vars3]),
+    back_variables(Term2, Term3),
+    format(string(Str), '~W', [Term3, [variable_names(Vars3)]]), !.
+trs_term_to_string(Term, Str, Vars) :-
+    format(user_error, 'failed to execute ~p~n',
+           [trs_term_to_string(Term, Str, Vars)]).
+
+/**
  * Terms に ⊥(_) が含まれているかチェックする。
  */
 contains_bottom(Terms) :-
@@ -192,31 +281,17 @@ contains_bottom(Terms) :-
  * 適用した結果リストと適用したルール名を返す。
  */
 find_rule_and_apply(InTerms, OutTerms, AppliedRule, GivenVars) :-
-    term_strings(InTerms, InStr, [variable_names(GivenVars)]),
+    trs_terms_to_string(InTerms, InStr, GivenVars),
     trs_rules(rule(RuleName, From1, From2, To, Guards, Vars)),
     apply_rule(InTerms, OutTerms, From1, From2, Guards, To),
     debug(trs, '~p: ~p',
           [find_rule_and_apply/3, (RuleName, From1, From2, To)]),
     append(GivenVars, Vars, Vars2),
-    term_string(From1, From1Str, [variable_names(Vars2)]),
-    term_string(From2, From2Str, [variable_names(Vars2)]),
-    term_string(To, ToStr, [variable_names(Vars2)]),
-    term_strings(OutTerms, OutStr, [variable_names(Vars2)]),
+    trs_term_to_string(From1, From1Str, Vars2),
+    trs_term_to_string(From2, From2Str, Vars2),
+    trs_term_to_string(To, ToStr, Vars2),
+    trs_terms_to_string(OutTerms, OutStr, Vars2),
     AppliedRule =.. [RuleName, InStr, From1Str, From2Str, ToStr, OutStr].
-
-/**
- * term_string/3 とほぼ同じ。但し、リストをカンマ区切り文字列として返す。
- */
-term_strings([], "", _).
-term_strings([T|Ts], Str, Args) :-
-    term_string(T, S, Args),
-    term_strings(Ts, Str, Args, S).
-term_strings([], Str, _, Str).
-term_strings([T|Ts], Str, Args, Ac) :-
-    term_string(T, S, Args),
-    string_concat(Ac, ", ", Ac1),
-    string_concat(Ac1, S, Ac2),
-    term_strings(Ts, Str, Args, Ac2).
 
 /**
  * 与えられた規則にマッチする項がリストにあれば、置き換える。

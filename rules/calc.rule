@@ -19,7 +19,7 @@ X := plus([N,M|Y]) <=>
      integer(N), integer(M), sum([N,M|Y], SumAndRest) |
 X := plus(SumAndRest).
 
-abol:=h(sum/2).
+abolish(sum/2).
 assert((sum([N,M|In], Out)
         :- integer(N), integer(M), NM is N + M,
            sum([NM|In], Out))).

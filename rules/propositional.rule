@@ -1,6 +1,12 @@
 % -*- mode: prolog; coding: utf-8-unix -*-
 
-assume(P) <=> compound(P) | P.
+assume(P) <=> logical_formula(P) | P.
+
+abolish(logical_formula/1).
+assert(logical_formula((_ ∨ _))).
+assert(logical_formula((_ ∧ _))).
+assert(logical_formula((¬ _))).
+assert(logical_formula((_ → _))).
 
 分配 @
 P ∨ (Q ∧ R) <=> \+ P = Q | P ∨ Q, P ∨ R.
