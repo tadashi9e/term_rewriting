@@ -166,7 +166,7 @@ trs_loop(InTerms, OutTerms, History, MaxSteps, Vars) :-
     create_variable_mapping(InVariables, InVariablesMapping),
     copy_term([InTerms1, InVariablesMapping, Vars],
               [InTerms2, InVariablesMapping2, Vars2]),
-    apply_variable_mapping(InVariablesMapping2, Vars2, Vars),
+    apply_variable_mapping(InVariablesMapping2, InVariablesMapping, Vars2),
     trs_loop_aux(InTerms2, OutTerms2, History, MaxSteps, Vars),
     % OutTerms に含まれる内部表現変数を元の変数に戻す
     back_variables(OutTerms2, OutTerms).
@@ -205,11 +205,12 @@ create_variable_mapping_aux([V|Vs], [V-N|Ms], N) :-
  * 変数名が与えられていない場合には、空文字列を用いる。
  */
 apply_variable_mapping([], _, _).
-apply_variable_mapping([V-N|Ms], Vars, OldVars) :-
+apply_variable_mapping([V-N|Ms], [OrigV-_|OrigMs], Vars) :-
     find_var_name(Vars, V, Name),
-    find_name_var(OldVars, Name, OldVar),
-    V = '$__trs_var__'(N, Name, OldVar),
-    apply_variable_mapping(Ms, Vars, OldVars).
+    debug(trs, '~p: ~p',
+          [apply_variable_mapping/3, '$__trs_var__'(N, Name, OrigV)]),
+    V = '$__trs_var__'(N, Name, OrigV),
+    apply_variable_mapping(Ms, OrigMs, Vars).
 
 /**
  * 「変数名=変数」のリストに従って、変数に対応する名称を得る。
@@ -217,13 +218,6 @@ apply_variable_mapping([V-N|Ms], Vars, OldVars) :-
 find_var_name([], _, '').  % not found
 find_var_name([Name=Var|_], V, Name) :- Var == V, !.
 find_var_name([_|Vars], Var, Name) :- find_var_name(Vars, Var, Name).
-
-/**
- * 変数名=変数のリストに従って、名称に対応する変数を得る。
- */
-find_name_var([], _, _).  % not found
-find_name_var([Name=Var|_], Name, Var).
-find_name_var([_|Vars], Name, Var) :- find_name_var(Vars, Name, Var).
 
 /**
  * '$__trs_var__'(内部管理番号, 変数名) に変換された変数を、元の変数に戻す。

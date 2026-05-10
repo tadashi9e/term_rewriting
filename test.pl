@@ -144,7 +144,7 @@ test8 :-
     writeln(OutTerms),
     OutTerms = [s ∨ ¬ s].
 test18 :-
-    Vars = ['P'=P, 'Q'=Q, 'R'=R],
+    Vars = ['P'=P, 'Q'=Q, 'R'=R, 'S'=S],
     trs_resolve([P ∨ Q,
                  ¬ P ∨ R,
                  ¬ Q ∨ S,
