@@ -164,9 +164,9 @@ trs_loop(InTerms, OutTerms, History, MaxSteps, Vars) :-
     % InTerms に含まれる変数を内部表現に書き換えた InTerms2 を得る
     msort(InTerms, InTerms1),
     create_variable_mapping(InVariables, InVariablesMapping),
-    copy_term([InTerms1, InVariablesMapping, Vars],
-              [InTerms2, InVariablesMapping2, Vars2]),
-    apply_variable_mapping(InVariablesMapping2, InVariablesMapping, Vars2),
+    copy_term([InTerms1, InVariablesMapping],
+              [InTerms2, InVariablesMapping2]),
+    apply_variable_mapping(InVariablesMapping2, InVariablesMapping, Vars),
     trs_loop_aux(InTerms2, OutTerms2, History, MaxSteps, Vars),
     % OutTerms に含まれる内部表現変数を元の変数に戻す
     back_variables(OutTerms2, OutTerms).

@@ -38,19 +38,19 @@ run_test(Test, ok_ng(OK0,NG0), ok_ng(OK,NG)) :-
 test1 :-
     trs_resolve([a → b, b → c, c → d], OutTerms), !,
     writeln(OutTerms),
-    OutTerms = [a→d].
+    OutTerms == [a→d].
 test11 :-
     Vars = ['A'=A, 'B'=B, 'C'=C, 'D'=D],
     trs_resolve([A → B, B → C, C → D], OutTerms, 100, 10, Vars), !,
     format('~W~n', [OutTerms, [variable_names(Vars)]]),
-    OutTerms = [A→D].
+    OutTerms == [A→D].
 test2 :-
     trs_resolve([ (a ∨ b)
                   ∧ (¬a ∨ c)
                   ∧ (¬b ∨ c)
                   ∧ (¬c) ], OutTerms), !,
     writeln(OutTerms),
-    OutTerms = [⊥].
+    OutTerms == [⊥].
 test12 :-
     Vars = ['A'=A, 'B'=B, 'C'=C],
     trs_resolve([ (A ∨ B)
@@ -58,7 +58,7 @@ test12 :-
                   ∧ (¬B ∨ C)
                   ∧ (¬C) ], OutTerms, 100, 10, Vars), !,
     writeln(OutTerms),
-    OutTerms = [⊥].
+    OutTerms == [⊥].
 test3 :-
     trs_resolve([ (a → b)
                   ∧ (b → c)
@@ -66,7 +66,7 @@ test3 :-
                   ∧ a
                   ∧ (¬d) ], OutTerms), !,
     writeln(OutTerms),
-    OutTerms = [⊥].
+    OutTerms == [⊥].
 test13 :-
     Vars = ['A'=A, 'B'=B, 'C'=C, 'D'=D],
     trs_resolve([ (A → B)
@@ -75,14 +75,14 @@ test13 :-
                   ∧ A
                   ∧ (¬D) ], OutTerms, 100, 10, Vars), !,
     writeln(OutTerms),
-    OutTerms = [⊥].
+    OutTerms == [⊥].
 test4 :-
     trs_resolve([ (a ∨ b)
                   ∧ (¬a ∨ b)
                   ∧ (a ∨ ¬b)
                   ∧ (¬a ∨ ¬b) ], OutTerms), !,
     writeln(OutTerms),
-    OutTerms = [⊥].
+    OutTerms == [⊥].
 test14 :-
     Vars = ['A'=A, 'B'=B],
     trs_resolve([ (A ∨ B)
@@ -90,14 +90,14 @@ test14 :-
                   ∧ (A ∨ ¬B)
                   ∧ (¬A ∨ ¬B) ], OutTerms, 100, 10, Vars), !,
     writeln(OutTerms),
-    OutTerms = [⊥].
+    OutTerms == [⊥].
 test5 :-
     trs_resolve([ (a ∨ b ∨ c)
                   ∧ (¬a ∨ b)
                   ∧ (¬b ∨ c)
                   ∧ (¬c) ], OutTerms), !,
     writeln(OutTerms),
-    OutTerms = [⊥].
+    OutTerms == [⊥].
 test15 :-
     Vars = ['A'=A, 'B'=B, 'C'=C],
     trs_resolve([ (A ∨ B ∨ C)
@@ -105,14 +105,14 @@ test15 :-
                   ∧ (¬B ∨ C)
                   ∧ (¬C) ], OutTerms, 100, 10, Vars), !,
     writeln(OutTerms),
-    OutTerms = [⊥].
+    OutTerms == [⊥].
 test6 :-
     trs_resolve([p ∨ q,
                  ¬p ∨ r,
                  ¬q ∨ r,
                  ¬r], OutTerms), !,
     writeln(OutTerms),
-    OutTerms = [⊥].
+    OutTerms == [⊥].
 test16 :-
     Vars = ['P'=P, 'Q'=Q, 'R'=R],
     trs_resolve([P ∨ Q,
@@ -120,14 +120,14 @@ test16 :-
                  ¬Q ∨ R,
                  ¬R], OutTerms, 100, 10, Vars), !,
     writeln(OutTerms),
-    OutTerms = [⊥].
+    OutTerms == [⊥].
 test7 :-
     trs_resolve([p ∨ q,
                  ¬ p ∨ q,
                  p ∨ ¬ q,
                  ¬ p ∨ ¬ q], OutTerms), !,
     writeln(OutTerms),
-    OutTerms = [⊥].
+    OutTerms == [⊥].
 test17 :-
     Vars = ['P'=P, 'Q'=Q],
     trs_resolve([P ∨ Q,
@@ -135,14 +135,14 @@ test17 :-
                  P ∨ ¬ Q,
                  ¬ P ∨ ¬ Q], OutTerms, 100, 10, Vars), !,
     writeln(OutTerms),
-    OutTerms = [⊥].
+    OutTerms == [⊥].
 test8 :-
     trs_resolve([p ∨ q,
                  ¬ p ∨ r,
                  ¬ q ∨ s,
                  ¬ r ∨ ¬ s], OutTerms, 5, 5), !,
     writeln(OutTerms),
-    OutTerms = [s ∨ ¬ s].
+    OutTerms == [s ∨ ¬ s].
 test18 :-
     Vars = ['P'=P, 'Q'=Q, 'R'=R, 'S'=S],
     trs_resolve([P ∨ Q,
@@ -150,49 +150,49 @@ test18 :-
                  ¬ Q ∨ S,
                  ¬ R ∨ ¬ S], OutTerms, 100, 10, Vars), !,
     writeln(OutTerms),
-    OutTerms = [s ∨ ¬ s].
+    OutTerms == [S ∨ ¬ S].
 test9 :-
     trs_resolve([ p ∨ q,
                   ¬ p ∨ ¬ q ], OutTerms, 5, 5), !,
     writeln(OutTerms),
-    OutTerms = [q∨ ¬q].
+    OutTerms == [q∨ ¬q].
 test19 :-
     Vars = ['P'=P, 'Q'=Q],
     trs_resolve([ P ∨ Q,
                   ¬ P ∨ ¬ Q ], OutTerms, 100, 10, Vars), !,
     writeln(OutTerms),
-    OutTerms = [Q∨ ¬Q].
+    OutTerms == [Q∨ ¬Q].
 
 test_calc1 :-
     trs_resolve([x := 1], OutTerms), !,
-    OutTerms = [x equals 1].
+    OutTerms == [x equals 1].
 test_calc2 :-
     trs_resolve([x := 1+2], OutTerms), !,
-    OutTerms = [x equals 3].
+    OutTerms == [x equals 3].
 test_calc3 :-
     trs_resolve([x := 1+2+3], OutTerms), !,
-    OutTerms = [x equals 6].
+    OutTerms == [x equals 6].
 test_calc4 :-
     trs_resolve([x := 2*3*4], OutTerms), !,
-    OutTerms = [x equals 24].
+    OutTerms == [x equals 24].
 test_calc5 :-
     trs_resolve([x := 2*(3*2)], OutTerms), !,
-    OutTerms = [x equals 12].
+    OutTerms == [x equals 12].
 test_calc6 :-
     trs_resolve([x := 2*(2*(2*2))], OutTerms), !,
-    OutTerms = [x equals 16].
+    OutTerms == [x equals 16].
 test_calc7 :-
     trs_resolve([x := 2*(3+4)], OutTerms), !,
-    OutTerms = [x equals 14].
+    OutTerms == [x equals 14].
 test_calc8 :-
     trs_resolve([x := (3+4*2)*2], OutTerms), !,
-    OutTerms = [x equals 22].
+    OutTerms == [x equals 22].
 test_calc9 :-
     trs_resolve([x := 2*(3+4*2)], OutTerms), !,
-    OutTerms = [x equals 22].
+    OutTerms == [x equals 22].
 test_calc10 :-
     trs_resolve([x := (2+3)*(4+5)], OutTerms), !,
-    OutTerms = [x equals 45].
+    OutTerms == [x equals 45].
 test_calc11 :-
     trs_resolve([x := 3*4*5], OutTerms), !,
-    OutTerms = [x equals 60].
+    OutTerms == [x equals 60].
