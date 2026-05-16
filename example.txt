@@ -12,11 +12,11 @@ true.
 ?- setup.
 ''@[assume(P)]<=>logical_formula(P)|[P]
 分配@[P∨(Q∧R)]<=> \+P=Q|[P∨Q,P∨R]
-吸収@[P∨(P∧_25418)]<=>true|[assume(P)]
+吸収@[P∨(P∧_25458)]<=>true|[assume(P)]
 前件肯定_modus_ponens@[assume(P),P→Q]<=>true|[assume(Q)]
 後件否定_modus_tollens@[¬Q]\[P→Q]<=>true|[¬P]
 否定導入_not@[P→ ⊥]<=>true|[¬P]
-否定導入_not@[P→ ⊥(_25152)]<=>true|[¬P]
+否定導入_not@[P→ ⊥(_25192)]<=>true|[¬P]
 二重否定の除去_double_negative_elimination@[¬ ¬P]<=>true|[assume(P)]
 選言三段論法_disjunctive_syllogism@[¬P]\[P∨Q]<=>true|[assume(Q)]
 選言三段論法_disjunctive_syllogism2@[¬P]\[Q∨P]<=>true|[assume(Q)]
@@ -29,21 +29,20 @@ true.
 導出_resolution@[L∨P,¬L∨Q]<=>L\=P,L\= ¬P,¬L\=P,L\=Q,L\= ¬Q,¬L\=Q|[P∨Q]
 ド_モルガンの法則_de_morgan_law@[¬ (P∨Q)]<=>true|[¬P∧ ¬Q]
 ド_モルガンの法則_de_morgan_law@[¬ (P∧Q)]<=>true|[¬P∨ ¬Q]
-''@[assume(P)]<=>logical_formula(P)|[P]
 initial@[(Left⇒Right)]<=>is_initial(Left,Right)|[init]
-'¬ L'@[(Left⇒Right)]<=>trs:cselect(¬L,Left,Ls)|[(Ls⇒L,Right)]
-'¬ R'@[(Left⇒Right)]<=>trs:cselect(¬R,Right,Rs)|[((R,Left)⇒Rs)]
-'∧ L'@[(Left⇒Right)]<=>trs:cselect(X∧Y,Left,Ls)|[((X,Y,Ls)⇒Right)]
-'∧ R'@[(Left⇒Right)]<=>trs:cselect(X∧Y,Right,Rs)|[(Left⇒X,Y,Rs)]
-'∨ L'@[(Left⇒Right)]<=>trs:cselect(X∨Y,Left,Ls)|[((X,Ls)⇒Right),((Y,Ls)⇒Right)]
-'∨ R'@[(Left⇒Right)]<=>trs:cselect(X∨Y,Right,Rs)|[(Left⇒X,Rs),(Left⇒Y,Rs)]
-'→ L'@[(Left⇒Right)]<=>trs:cselect(X→Y,Left,Ls)|[(Ls⇒X,Right),((Y,Ls)⇒Right)]
-'→ R'@[(Left⇒Right)]<=>trs:cselect(X→Y,Right,Rs)|[((X,Left)⇒Rs),(Left⇒Y,Rs)]
-計算開始@[X:=A]<=> \+A=..[plus|_22882]|[X:=plus([A])]
+'¬ L'@[(Left1⇒Right1)]<=>trs:cselect(¬L,Left1,Left2),trs:cappend(L,Right1,Right2)|[(Left2⇒Right2)]
+'¬ R'@[(Left1⇒Right1)]<=>trs:cselect(¬R,Right1,Right2),trs:cappend(R,Left1,Left2)|[(Left2⇒Right2)]
+'∧ L'@[(Left1⇒Right)]<=>trs:cselect(X∧Y,Left1,Ls),trs:cappend((X,Y),Ls,Left2)|[(Left2⇒Right)]
+'∧ R'@[(Left⇒Right1)]<=>trs:cselect(X∧Y,Right1,Rs),trs:cappend((X,Y),Rs,Right2)|[(Left⇒Right2)]
+'∨ L'@[(Left1⇒Right)]<=>trs:cselect(X∨Y,Left1,Ls),trs:cappend(X,Ls,XLeft),trs:cappend(Y,Ls,YLeft)|[(XLeft⇒Right),(YLeft⇒Right)]
+'∨ R'@[(Left⇒Right1)]<=>trs:cselect(X∨Y,Right1,Rs),trs:cappend((X,Y),Rs,Right2)|[(Left⇒Right2)]
+'→ L'@[(Left⇒Right)]<=>trs:cselect(X→Y,Left,Ls),trs:cappend(X,Right,Right2),trs:cappend(Y,Ls,Left2)|[(Ls⇒Right2),(Left2⇒Right)]
+'→ R'@[(Left⇒Right)]<=>trs:cselect(X→Y,Right,Rs),trs:cappend(X,Left,Left2),trs:cappend(Y,Rs,Right2)|[(Left2⇒Rs),(Left⇒Right2)]
+計算開始@[X:=A]<=> \+A=..[plus|_22700]|[X:=plus([A])]
 計算完了@[X:=plus([N])]<=>integer(N)|[X equals N]
 分解@[X:=plus([A+B|Y])]<=>true|[X:=plus([A,B|Y])]
 '足し算(数値)'@[X:=plus([N,M|Y])]<=>integer(N),integer(M),sum([N,M|Y],SumAndRest)|[X:=plus(SumAndRest)]
-'掛け算(*0)'@[X:=plus([_22402*0|Y])]<=>true|[X:=plus(Y)]
+'掛け算(*0)'@[X:=plus([_22220*0|Y])]<=>true|[X:=plus(Y)]
 '掛け算(*1)'@[X:=plus([A*1|Y])]<=>true|[X:=plus([A|Y])]
 '掛け算(交換)'@[X:=plus([N*A|Y])]<=>integer(N),\+integer(A)|[X:=plus([A*N|Y])]
 '掛け算(帰納法)'@[X:=plus([A*N|Y])]<=>integer(N),N>0,N1 is N-1|[X:=plus([A*N1,A|Y])]
@@ -355,7 +354,7 @@ P∨Q, ¬P∨R, ¬Q∨S, ¬R∨ ¬S
 ---------------- 導出_resolution ( [R∨S,¬R∨ ¬S] ⊢ [S∨ ¬S] )
 S∨ ¬S
 
-[_51566∨ ¬_51566]
+[_51594∨ ¬_51594]
 OK
 ############################################################
 #    test19
@@ -364,7 +363,7 @@ P∨Q, ¬P∨ ¬Q
 ---------------- 導出_resolution ( [P∨Q,¬P∨ ¬Q] ⊢ [Q∨ ¬Q] )
 Q∨ ¬Q
 
-[_61632∨ ¬_61632]
+[_61660∨ ¬_61660]
 OK
 ############################################################
 #    test_wang1
@@ -382,6 +381,19 @@ init
 [init]
 OK
 ############################################################
+#    test_wang2
+############################################################
+⊤ ⇒a∨ ¬a
+---------------- ∨ R ( [(⊤ ⇒a∨ ¬a)] ⊢ [(⊤ ⇒a,¬a)] )
+⊤ ⇒a,¬a
+---------------- ¬ R ( [(⊤ ⇒a,¬a)] ⊢ [(a⇒a)] )
+a⇒a
+---------------- initial ( [(a⇒a)] ⊢ [init] )
+init
+
+[init]
+OK
+############################################################
 #    test_wang11
 ############################################################
 A→B⇒ ¬A,B
@@ -392,6 +404,19 @@ A→B⇒ ¬A,B
 ---------------- initial ( [((B,A)⇒B)] ⊢ [init] )
 init, A⇒A,B
 ---------------- initial ( [(A⇒A,B)] ⊢ [init] )
+init
+
+[init]
+OK
+############################################################
+#    test_wang12
+############################################################
+⊤ ⇒A∨ ¬A
+---------------- ∨ R ( [(⊤ ⇒A∨ ¬A)] ⊢ [(⊤ ⇒A,¬A)] )
+⊤ ⇒A,¬A
+---------------- ¬ R ( [(⊤ ⇒A,¬A)] ⊢ [(A⇒A)] )
+A⇒A
+---------------- initial ( [(A⇒A)] ⊢ [init] )
 init
 
 [init]
@@ -841,7 +866,7 @@ x equals 60
 
 OK
 ############################################################
-#    Total: 31, OK: 31, NG: 0
+#    Total: 33, OK: 33, NG: 0
 ############################################################
 true.
 

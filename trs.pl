@@ -432,14 +432,36 @@ trs_resolve(InTerms, OutTerms, MaxSteps, MaxDepth, Vars) :-
     trs_dump_history(History), nl.
 
 /**
- * ','/2 向けの select/3 を目指して書いたもの。満足はしていない。
+ * ','/2 向けの select/3。
  */
-cselect(L, (L, T), T).
-cselect(L, (H, T), R) :-
-    cselect(L, T, S),
-    ( S == true -> R = H
-    ; R = (H, S) ).
-cselect(L, L, true).
+cselect(X, Conj, RestConj) :-
+    conj_to_list(Conj, L),
+    select(X, L, R),
+    list_to_conj(R, RestConj).
+
+conj_to_list((A,As), [A|Bs]) :-
+    !, conj_to_list(As, Bs).
+conj_to_list(X, []) :- X == ⊤, !.
+conj_to_list(X, [X]) :- !.
+
+list_to_conj([], ⊤) :- !.
+list_to_conj([A], A) :- !.
+list_to_conj([A|As], Bs) :-
+    ( A == ⊤ -> list_to_conj(As, Bs)
+    ; As == ⊤ -> Bs = A
+    ; list_to_conj(As, Bs2),
+      ( Bs == ⊤ -> Bs = A
+      ; Bs = (A, Bs2) ) ).
+
+/**
+ * ','/2 向けの append/3。空の場合には '⊤'。
+ * append/3 のような双方向性はない。
+ */
+cappend(As, Bs, Cs) :-
+    conj_to_list(As, As2),
+    conj_to_list(Bs, Bs2),
+    append(As2, Bs2, Cs2),
+    list_to_conj(Cs2, Cs).
 
 /**
  * このシステム上で変数とみなされる値かチェックする。
