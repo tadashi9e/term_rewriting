@@ -6,6 +6,7 @@ setup :-
     trs_abolish_all_rules,
     trs_load_rules('rules/propositional.rule'),
     trs_load_rules('rules/de_morgan.rule'),
+    trs_load_rules('rules/wang.rule'),
     trs_load_rules('rules/calc.rule'),
     trs_dump_all_rules.
 
@@ -13,6 +14,7 @@ test :-
     Tests = [test1, test2, test3, test4, test5, test6, test7, test8, test9,
              test11, test12, test13, test14, test15,
              test16, test17, test18, test19,
+             test_wang1, test_wang11,
              test_calc1, test_calc2, test_calc3, test_calc4, test_calc5,
              test_calc6, test_calc7, test_calc8,test_calc9, test_calc10,
              test_calc11],
@@ -162,6 +164,16 @@ test19 :-
                   ¬ P ∨ ¬ Q ], OutTerms, 100, 10, Vars), !,
     writeln(OutTerms),
     OutTerms == [Q∨ ¬Q].
+
+test_wang1 :-
+    trs_resolve([(a→b)⇒(¬a,b)], OutTerms, 100, 10), !,
+    writeln(OutTerms),
+    OutTerms == [init].
+test_wang11 :-
+    Vars = ['A'=A, 'B'=B],
+    trs_resolve([(A→B)⇒(¬A,B)], OutTerms, 100, 10, Vars), !,
+    writeln(OutTerms),
+    OutTerms == [init].
 
 test_calc1 :-
     trs_resolve([x := 1], OutTerms), !,

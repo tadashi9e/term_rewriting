@@ -1,0 +1,48 @@
+% -*- mode: prolog; coding: utf-8-unix -*-
+% Wang Algorithm
+
+initial @
+Left ⇒ Right <=> is_initial(Left, Right) |
+init.
+
+assert((is_initial(Left, Right) :-
+            trs:cselect(L, Left, _),
+            ( atomic(L) ; trs:is_variable(L) ),
+            trs:cselect(L, Right, _), !
+       )).
+
+'¬ L' @
+Left ⇒ Right <=> trs:cselect(¬ L, Left, Ls) |
+Ls ⇒ (L, Right).
+
+'¬ R' @
+Left ⇒ Right <=> trs:cselect(¬ R, Right, Rs) |
+(R, Left) ⇒ Rs.
+
+'∧ L' @
+Left ⇒ Right <=> trs:cselect(X ∧ Y, Left, Ls) |
+(X, Y, Ls) ⇒ Right.
+
+'∧ R' @
+Left ⇒ Right <=> trs:cselect(X ∧ Y, Right, Rs) |
+Left ⇒ (X, Y, Rs).
+
+'∨ L' @
+Left ⇒ Right <=> trs:cselect(X ∨ Y, Left, Ls) |
+((X, Ls) ⇒ Right),
+((Y, Ls) ⇒ Right).
+
+'∨ R' @
+Left ⇒ Right <=> trs:cselect(X ∨ Y, Right, Rs) |
+(Left ⇒ (X, Rs)),
+(Left ⇒ (Y, Rs)).
+
+'→ L' @
+Left ⇒ Right <=> trs:cselect(X → Y, Left, Ls) |
+(Ls ⇒ (X, Right)),
+((Y, Ls) ⇒ Right).
+
+'→ R' @
+Left ⇒ Right <=> trs:cselect(X → Y, Right, Rs) |
+((X, Left) ⇒ Rs),
+(Left ⇒ (Y, Rs)).

@@ -17,6 +17,7 @@
               op(1105, xfy, '|'),
               op(1100, xfx, '\\'),
               op(1000, xfy, '⊢'),
+              op(1000, xfy, '⇒'),
               op(900, xfy, '→'),
               op(900, xfy, '⇔'),
               op(700, xfx, ':='),  % 数式処理の指示
@@ -139,7 +140,7 @@ dump_all_rules(
     dump_all_rules(RuleBag).
 
 /**
-* 読み込み済みの全てのルールを消去する。
+ * 読み込み済みの全てのルールを消去する。
  */
 trs_abolish_all_rules :-
     abolish(trs_rules/1).
@@ -429,3 +430,18 @@ trs_resolve(InTerms, OutTerms, MaxSteps, MaxDepth, Vars) :-
     Depth =< MaxDepth,
     !,
     trs_dump_history(History), nl.
+
+/**
+ * ','/2 向けの select/3 を目指して書いたもの。満足はしていない。
+ */
+cselect(L, (L, T), T).
+cselect(L, (H, T), R) :-
+    cselect(L, T, S),
+    ( S == true -> R = H
+    ; R = (H, S) ).
+cselect(L, L, true).
+
+/**
+ * このシステム上で変数とみなされる値かチェックする。
+ */
+is_variable('$__trs_var__'(_,_,_)).
