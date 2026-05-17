@@ -429,36 +429,40 @@ trs_resolve(InTerms, OutTerms, MaxSteps, MaxDepth, Vars) :-
     trs_dump_history(History), nl.
 
 /**
- * ','/2 向けの select/3。
- */
-cselect(X, Conj, RestConj) :-
-    conj_to_list(Conj, L),
-    select(X, L, R),
-    list_to_conj(R, RestConj).
-
-conj_to_list((A,As), [A|Bs]) :-
-    !, conj_to_list(As, Bs).
-conj_to_list(X, []) :- X == ⊤, !.
-conj_to_list(X, [X]) :- !.
-
-list_to_conj([], ⊤) :- !.
-list_to_conj([A], A) :- !.
-list_to_conj([A|As], Bs) :-
-    ( A == ⊤ -> list_to_conj(As, Bs)
-    ; As == ⊤ -> Bs = A
-    ; list_to_conj(As, Bs2),
-      ( Bs == ⊤ -> Bs = A
-      ; Bs = (A, Bs2) ) ).
-
-/**
- * ','/2 向けの append/3。空の場合には '⊤'。
+ * ','/2 向けの append。As と Bs を連結して Cs にする。
+ * Empty は空として扱う。
  * append/3 のような双方向性はない。
  */
-cappend(As, Bs, Cs) :-
-    conj_to_list(As, As2),
-    conj_to_list(Bs, Bs2),
+cappend(As, Bs, Cs, Empty) :-
+    conj_to_list(As, As2, Empty),
+    conj_to_list(Bs, Bs2, Empty),
     append(As2, Bs2, Cs2),
-    list_to_conj(Cs2, Cs).
+    list_to_conj(Cs2, Cs, Empty).
+
+/**
+ * ','/2 向けの select。
+ * Conj の要素を X として抜き出し、残りを RestConj にする。
+ * Empty は空として扱う。
+ */
+cselect(X, Conj, RestConj, Empty) :-
+    conj_to_list(Conj, L, Empty),
+    select(X, L, R),
+    list_to_conj(R, RestConj, Empty).
+
+conj_to_list(X, [], Empty) :- X == Empty, !.
+conj_to_list(X, [X], _) :- var(X), !.
+conj_to_list((A,As), [A|Bs], Empty) :-
+    !, conj_to_list(As, Bs, Empty).
+conj_to_list(X, [X], _) :- !.
+
+list_to_conj([], Empty, Empty) :- !.
+list_to_conj([A], A, _) :- !.
+list_to_conj([A|As], Bs, Empty) :-
+    ( A == Empty -> list_to_conj(As, Bs, Empty)
+    ; As == Empty -> Bs = A
+    ; list_to_conj(As, Bs2, Empty),
+      ( Bs == Empty -> Bs = A
+      ; Bs = (A, Bs2) ) ).
 
 /**
  * このシステム上で変数とみなされる値かチェックする。

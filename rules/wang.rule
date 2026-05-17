@@ -6,58 +6,58 @@ Left ⇒ Right <=> is_initial(Left, Right) |
 init.
 
 assert((is_initial(Left, Right) :-
-            trs:cselect(L, Left, _),
-            trs:cselect(L, Right, _), !
+            trs:cselect(L, Left, _, ⊤),
+            trs:cselect(L, Right, _, ⊥), !
        )).
 
 init, init <=> init.
 
 '¬ L' @
 Left1 ⇒ Right1 <=>
-trs:cselect(¬ L, Left1, Left2), trs:cappend(L, Right1, Right2) |
+trs:cselect(¬ L, Left1, Left2, ⊤), trs:cappend(L, Right1, Right2, ⊥) |
 Left2 ⇒ Right2.
 
 '¬ R' @
 Left1 ⇒ Right1 <=>
-trs:cselect(¬ R, Right1, Right2), trs:cappend(R, Left1, Left2) |
+trs:cselect(¬ R, Right1, Right2, ⊥), trs:cappend(R, Left1, Left2, ⊤) |
 Left2 ⇒ Right2.
 
 '∧ L' @
 Left1 ⇒ Right <=>
-trs:cselect(X ∧ Y, Left1, Ls), trs:cappend((X, Y), Ls, Left2) |
+trs:cselect(X ∧ Y, Left1, Ls, ⊤), trs:cappend((X, Y), Ls, Left2, ⊤) |
 Left2 ⇒ Right.
 
 '∧ R' @
 Left ⇒ Right1 <=>
-trs:cselect(X ∧ Y, Right1, Rs), trs:cappend((X, Y), Rs, Right2) |
+trs:cselect(X ∧ Y, Right1, Rs, ⊥), trs:cappend((X, Y), Rs, Right2, ⊥) |
 Left ⇒ Right2.
 
 '∨ L' @
 Left1 ⇒ Right <=>
-trs:cselect(X ∨ Y, Left1, Ls),
-trs:cappend(X, Ls, XLeft),
-trs:cappend(Y, Ls, YLeft) |
+trs:cselect(X ∨ Y, Left1, Ls, ⊤),
+trs:cappend(X, Ls, XLeft, ⊤),
+trs:cappend(Y, Ls, YLeft, ⊤) |
 (XLeft ⇒ Right),
 (YLeft ⇒ Right).
 
 '∨ R' @
 Left ⇒ Right1 <=>
-trs:cselect(X ∨ Y, Right1, Rs),
-trs:cappend((X, Y), Rs, Right2) |
+trs:cselect(X ∨ Y, Right1, Rs, ⊥),
+trs:cappend((X, Y), Rs, Right2, ⊥) |
 Left ⇒ Right2.
 
 '→ L' @
 Left ⇒ Right <=>
-trs:cselect(X → Y, Left, Ls),
-trs:cappend(X, Right, Right2),
-trs:cappend(Y, Ls, Left2) |
+trs:cselect(X → Y, Left, Ls, ⊤),
+trs:cappend(X, Right, Right2, ⊥),
+trs:cappend(Y, Ls, Left2, ⊤) |
 (Ls ⇒ Right2),
 (Left2 ⇒ Right).
 
 '→ R' @
 Left ⇒ Right <=>
-trs:cselect(X → Y, Right, Rs),
-trs:cappend(X, Left, Left2),
-trs:cappend(Y, Rs, Right2) |
+trs:cselect(X → Y, Right, Rs, ⊥),
+trs:cappend(X, Left, Left2, ⊤),
+trs:cappend(Y, Rs, Right2, ⊥) |
 (Left2 ⇒ Rs),
 (Left ⇒ Right2).
