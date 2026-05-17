@@ -14,8 +14,8 @@ test :-
     Tests = [test1, test2, test3, test4, test5, test6, test7, test8, test9,
              test11, test12, test13, test14, test15,
              test16, test17, test18, test19,
-             test_wang1, test_wang2,
-             test_wang11, test_wang12,
+             test_wang1, test_wang2, test_wang3,
+             test_wang11, test_wang12, test_wang13,
              test_calc1, test_calc2, test_calc3, test_calc4, test_calc5,
              test_calc6, test_calc7, test_calc8,test_calc9, test_calc10,
              test_calc11],
@@ -182,6 +182,15 @@ test_wang2 :-
 test_wang12 :-
     Vars = ['A'=A],
     trs_resolve([⊤ ⇒A ∨ ¬ A], OutTerms, 100, 10, Vars), !,
+    writeln(OutTerms),
+    OutTerms == [init].
+test_wang3 :-
+    trs_resolve([¬a ∨ ¬b ⇒ ¬ (a ∧ b)], OutTerms, 100, 10), !,
+    writeln(OutTerms),
+    OutTerms == [init].
+test_wang13 :-
+    Vars = ['A'=A, 'B'=B],
+    trs_resolve([¬A ∨ ¬B ⇒ ¬ (A ∧ B)], OutTerms, 100, 10, Vars), !,
     writeln(OutTerms),
     OutTerms == [init].
 

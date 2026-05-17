@@ -310,10 +310,7 @@ apply_rule(InTerms, OutTerms, FromRule1, FromRule2, Guards, ToTerms) :-
     check_guard(Guards),
     % 結果収集
     append(AppliedTerms1, RestTerms2, Ts),
-    append(Ts, ToTerms, RawOutTerms),
-    normalize_terms(RawOutTerms, OutTerms).
-normalize_terms(Terms, Normalized) :-
-    sort(Terms, Normalized).  % 重複除去
+    append(Ts, ToTerms, OutTerms).
 
 /**
  * 条件リストの要素が入力項リストの項にマッチするかチェックする。

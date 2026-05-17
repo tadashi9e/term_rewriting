@@ -10,6 +10,8 @@ assert((is_initial(Left, Right) :-
             trs:cselect(L, Right, _), !
        )).
 
+init, init <=> init.
+
 '¬ L' @
 Left1 ⇒ Right1 <=>
 trs:cselect(¬ L, Left1, Left2), trs:cappend(L, Right1, Right2) |
