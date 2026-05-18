@@ -167,30 +167,36 @@ test19 :-
     OutTerms == [Q∨ ¬Q].
 
 test_wang1 :-
-    trs_resolve([(a→b)⇒(¬a,b)], OutTerms, 100, 10), !,
+    trs_loop([(a→b)⇒(¬a,b)], OutTerms, History, 10, []),
+    trs_dump_rev_history(History),
     writeln(OutTerms),
     OutTerms == [init].
 test_wang11 :-
     Vars = ['A'=A, 'B'=B],
-    trs_resolve([(A→B)⇒(¬A,B)], OutTerms, 100, 10, Vars), !,
+    trs_loop([(A→B)⇒(¬A,B)], OutTerms, History, 10, Vars),
+    trs_dump_rev_history(History),
     writeln(OutTerms),
     OutTerms == [init].
 test_wang2 :-
-    trs_resolve([⊤ ⇒ a ∨ ¬ a], OutTerms, 100, 10), !,
+    trs_loop([⊤ ⇒ a ∨ ¬ a], OutTerms, History, 10, []),
+    trs_dump_rev_history(History),
     writeln(OutTerms),
     OutTerms == [init].
 test_wang12 :-
     Vars = ['A'=A],
-    trs_resolve([⊤ ⇒A ∨ ¬ A], OutTerms, 100, 10, Vars), !,
+    trs_loop([⊤ ⇒A ∨ ¬ A], OutTerms, History, 10, Vars),
+    trs_dump_rev_history(History),
     writeln(OutTerms),
     OutTerms == [init].
 test_wang3 :-
-    trs_resolve([¬a ∨ ¬b ⇒ ¬ (a ∧ b)], OutTerms, 100, 10), !,
+    trs_loop([¬a ∨ ¬b ⇒ ¬ (a ∧ b)], OutTerms, History, 10, []),
+    trs_dump_rev_history(History),
     writeln(OutTerms),
     OutTerms == [init].
 test_wang13 :-
     Vars = ['A'=A, 'B'=B],
-    trs_resolve([¬A ∨ ¬B ⇒ ¬ (A ∧ B)], OutTerms, 100, 10, Vars), !,
+    trs_loop([¬A ∨ ¬B ⇒ ¬ (A ∧ B)], OutTerms, History, 10, Vars),
+    trs_dump_rev_history(History),
     writeln(OutTerms),
     OutTerms == [init].
 

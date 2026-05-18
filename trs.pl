@@ -10,6 +10,7 @@
               trs_loop/4,
               trs_loop/5,
               trs_dump_history/1,
+              trs_dump_rev_history/1,
               max_depth_of_terms/2,
               op(1200, xfx, '@'),
               op(1180, xfx, '<=>'),
@@ -395,6 +396,26 @@ dump_rules([Rule|Rules]) :-
                [RuleName, From1Str, From2Str, ToStr]) ) ),
     ( Rules = [] -> writeln(OutStr)
     ; dump_rules(Rules) ).
+
+/**
+ * 項書換え履歴を逆順に表示する。
+ * @param Rules 適用したルールのリスト
+ */
+trs_dump_rev_history(Rules) :-
+    dump_rev_rules(Rules).
+dump_rev_rules([]).
+dump_rev_rules([Rule|Rules]) :-
+    Rule =.. [RuleName, InStr, From1Str, From2Str, ToStr, OutStr],
+    ( RuleName = ''
+    ; writeln(OutStr),
+      write('---------------- '),
+      ( From1Str = "[]"
+      -> format('~s ( ~s ⊢ ~s )~n',
+                [RuleName, From2Str, ToStr])
+      ; format('~s ( ~s \\ ~s ⊢ ~s )~n',
+               [RuleName, From1Str, From2Str, ToStr]) ) ),
+    ( Rules = [] -> writeln(InStr)
+    ; dump_rev_rules(Rules) ).
 
 depth_of_term(T, D) :-
     ( compound(T)
