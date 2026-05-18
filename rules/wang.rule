@@ -12,6 +12,9 @@ assert((is_initial(Left, Right) :-
 
 init, init <=> init.
 
+contradiction @
+(⊤ ⇒ A), (A ⇒ ⊥) <=> contradiction(A).
+
 '¬ L' @
 Left1 ⇒ Right1 <=>
 trs:cselect(¬ L, Left1, Left2, ⊤), trs:cappend(L, Right1, Right2, ⊥) |
