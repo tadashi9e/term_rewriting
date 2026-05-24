@@ -15,7 +15,9 @@ test :-
              test11, test12, test13, test14, test15,
              test16, test17, test18, test19,
              test_wang1, test_wang2, test_wang3, test_wang4,
+             test_wang5, test_wang6, test_wang7,
              test_wang11, test_wang12, test_wang13, test_wang14,
+             test_wang15, test_wang16, test_wang17,
              test_calc1, test_calc2, test_calc3, test_calc4, test_calc5,
              test_calc6, test_calc7, test_calc8,test_calc9, test_calc10,
              test_calc11],
@@ -210,7 +212,45 @@ test_wang14 :-
     trs_loop([A ∨ ¬A ⇒ ⊥], OutTerms, History, 10, Vars),
     trs_dump_rev_history(History), !,
     writeln(OutTerms),
-    OutTerms == [contradiction(a)].
+    OutTerms == [contradiction(A)].
+
+% 背理法
+test_wang5 :-
+    trs_loop([a → (b ∧ ¬ b) ⇒ ¬ a], OutTerms, History, 10, []),
+    trs_dump_rev_history(History), !,
+    writeln(OutTerms),
+    OutTerms == [init].
+test_wang15 :-
+    Vars = ['A' = A, 'B' = B],
+    trs_loop([A → (B ∧ ¬ B) ⇒ ¬ A], OutTerms, History, 10, Vars),
+    trs_dump_rev_history(History), !,
+    writeln(OutTerms),
+    OutTerms == [init].
+% 構造規則
+test_wang6 :-
+    trs_loop([a ⇒ b → a], OutTerms, History, 10, []),
+    trs_dump_rev_history(History), !,
+    writeln(OutTerms),
+    OutTerms == [init].
+test_wang16 :-
+    Vars = ['A' = A, 'B' = B],
+    trs_loop([A ⇒ B → A], OutTerms, History, 10, Vars),
+    trs_dump_rev_history(History), !,
+    writeln(OutTerms),
+    OutTerms == [init].
+
+% 二重否定の排除
+test_wang7 :-
+    trs_loop([¬ ¬ a ⇒ a], OutTerms, History, 10, []),
+    trs_dump_rev_history(History), !,
+    writeln(OutTerms),
+    OutTerms == [init].
+test_wang17 :-
+    Vars = ['A' = A],
+    trs_loop([¬ ¬ A ⇒ A], OutTerms, History, 10, Vars),
+    trs_dump_rev_history(History), !,
+    writeln(OutTerms),
+    OutTerms == [init].
 
 test_calc1 :-
     trs_resolve([x := 1], OutTerms), !,

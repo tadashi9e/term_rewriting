@@ -15,26 +15,41 @@ init, init <=> init.
 contradiction @
 (⊤ ⇒ A), (A ⇒ ⊥) <=> contradiction(A).
 
+% @startuml
+% :<latex>\cfrac{\Gamma \Rightarrow \Delta , A}{\lnot A, \Gamma \Rightarrow \Delta}(\lnot L)</latex>;
+% @enduml
 '¬ L' @
 Left1 ⇒ Right1 <=>
 trs:cselect(¬ L, Left1, Left2, ⊤), trs:cappend(L, Right1, Right2, ⊥) |
 Left2 ⇒ Right2.
 
+% @startuml
+% :<latex>\cfrac{A,\Gamma \Rightarrow \Delta}{\Gamma \Rightarrow \Delta, \lnot A}(\lnot R)</latex>;
+% @enduml
 '¬ R' @
 Left1 ⇒ Right1 <=>
 trs:cselect(¬ R, Right1, Right2, ⊥), trs:cappend(R, Left1, Left2, ⊤) |
 Left2 ⇒ Right2.
 
+% @startuml
+% :<latex>\cfrac{A,B,\Gamma \Rightarrow \Delta}{A \land B,\Gamma \Rightarrow \Delta}(\land L)</latex>;
+% @enduml
 '∧ L' @
 Left1 ⇒ Right <=>
 trs:cselect(X ∧ Y, Left1, Ls, ⊤), trs:cappend((X, Y), Ls, Left2, ⊤) |
 Left2 ⇒ Right.
 
+% @startuml
+% :<latex>\cfrac{\Gamma \Rightarrow \Delta,A \quad \Gamma \Rightarrow \Delta,B}{\Gamma \Rightarrow \Delta,A \land B}(\land R)</latex>;
+% @enduml
 '∧ R' @
 Left ⇒ Right1 <=>
 trs:cselect(X ∧ Y, Right1, Rs, ⊥), trs:cappend((X, Y), Rs, Right2, ⊥) |
 Left ⇒ Right2.
 
+% @startuml
+% :<latex>\cfrac{A,\Gamma \Rightarrow \Delta \quad B,\Gamma \Rightarrow \Delta}{A \lor B,\Gamma \Rightarrow \Delta}(\lor L)</latex>;
+% @enduml
 '∨ L' @
 Left1 ⇒ Right <=>
 trs:cselect(X ∨ Y, Left1, Ls, ⊤),
@@ -43,12 +58,18 @@ trs:cappend(Y, Ls, YLeft, ⊤) |
 (XLeft ⇒ Right),
 (YLeft ⇒ Right).
 
+% @startuml
+% :<latex>\cfrac{\Gamma \Rightarrow \Delta,A,B}{\Gamma \Rightarrow \Delta,A \lor B}(\lor R)</latex>;
+% @enduml
 '∨ R' @
 Left ⇒ Right1 <=>
 trs:cselect(X ∨ Y, Right1, Rs, ⊥),
 trs:cappend((X, Y), Rs, Right2, ⊥) |
 Left ⇒ Right2.
 
+% @startuml
+% :<latex>\cfrac{\Gamma \Rightarrow \Delta,A \quad B,\Gamma \Rightarrow \Delta}{A \to B, \Gamma \Rightarrow \Delta}(\to L)</latex>;
+% @enduml
 '→ L' @
 Left ⇒ Right <=>
 trs:cselect(X → Y, Left, Ls, ⊤),
@@ -57,10 +78,12 @@ trs:cappend(Y, Ls, Left2, ⊤) |
 (Ls ⇒ Right2),
 (Left2 ⇒ Right).
 
+% @startuml
+% :<latex>\cfrac{A,\Gamma \Rightarrow \Delta,B}{\Gamma \Rightarrow \Delta, A \to B}(\to R)</latex>;
+% @enduml
 '→ R' @
 Left ⇒ Right <=>
 trs:cselect(X → Y, Right, Rs, ⊥),
 trs:cappend(X, Left, Left2, ⊤),
 trs:cappend(Y, Rs, Right2, ⊥) |
-(Left2 ⇒ Rs),
-(Left ⇒ Right2).
+Left2 ⇒ Right2.
